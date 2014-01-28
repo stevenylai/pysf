@@ -32,7 +32,6 @@ import re
 import socket
 
 from PacketSource import *
-from Platform import *
 from SFProtocol import *
 from SocketIO import *
 
@@ -67,3 +66,13 @@ class SFSource(PacketSource):
 
     def writePacket(self, packet):
         self.prot.writePacket(packet)
+
+if __name__ == '__main__':
+    sf = SFSource(None, '192.168.1.26:3000')
+    sf.open()
+    while True:
+        packet = sf.readPacket()
+        print("Packet: ", end="")
+        for b in packet:
+            print('{0:02X}'.format(b), end="")
+        print("")

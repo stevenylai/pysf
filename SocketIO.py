@@ -52,7 +52,7 @@ class SocketIO(IO):
         self.done = True
 
     def open(self):
-        print "SocketIO: Connecting socket to "+str(self.host)+":"+str(self.port)
+        print ("SocketIO: Connecting socket to "+str(self.host)+":"+str(self.port))
         self.socket.connect((self.host, self.port))
         self.socket.settimeout(1)
 
@@ -61,7 +61,7 @@ class SocketIO(IO):
         self.socket = None
 
     def read(self, count):
-        data = ""
+        data = b""
         while count - len(data) > 0:
             if self.isDone():
                 raise IODone()

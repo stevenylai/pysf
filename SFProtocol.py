@@ -44,10 +44,10 @@ class SFProtocol:
         self.platform = None
 
     def open(self):
-        self.outs.write(VERSION + SUBVERSION)
-        partner = self.ins.read(2)
+        self.outs.write(bytes(VERSION + SUBVERSION, 'utf-8'))
+        partner = self.ins.read(2).decode('utf-8')
         if partner[0] != VERSION:
-            print "SFProtocol : version error"
+            print ("SFProtocol : version error")
             raise SFProtocolException("protocol version error")
 
 	# Actual version is min received vs our version
@@ -71,7 +71,7 @@ class SFProtocol:
         if len(packet) > 255:
             raise SFProtocolException("packet too long")
 
-        self.outs.write(chr(len(packet)))
+        self.outs.write(bytes(chr(len(packet)), 'utf-8'))
         self.outs.write(packet)
         self.outs.flush()
         
