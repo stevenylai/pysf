@@ -20,7 +20,7 @@ def dump_pkt(packet):
           #"payload len:", packet.payload_length)
     dump_rfm(packet.payload)
 
-if __name__ == '__main__':
+def listen():
     from ...core.SFSource import SFSource
     from ...packet import pkt
     from ...packet import rfm
@@ -32,3 +32,25 @@ if __name__ == '__main__':
             packet = sf.readPacket()
             packet = pkt.Packeter(packet)
             dump_pkt(packet)
+
+def gen_packet():
+    from ...packet import rfm_socket_data
+    from ...packet import rfm
+    from ...packet import pkt
+    socket_data = rfm_socket_data.Packeter(None, 0)
+    socket_data.voltage = 220
+    socket_data.current = 0
+    socket_data.freq = 50
+    socket_data.power = 3000
+    print(socket_data.packet)
+    rfm_packet = rfm.Packeter(None, 0)
+    rfm_packet.dest = 0x181818
+    rfm_packet.src = 0xa
+    rfm_packet.type = rfm.RFM_SOCKET_DATA
+    rfm_packet.payload = socket_data.packet
+    rfm_packet.length = 8
+    print(rfm_packet.packet)
+
+if __name__ == '__main__':
+    #listen()
+    gen_packet()

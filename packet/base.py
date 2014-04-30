@@ -1,6 +1,11 @@
 class Packeter:
     def __init__(self, packet, offset = 0, len = -1):
-        if isinstance(packet, Packeter):
+        if packet == None:
+            self.raw_packet = b''
+            for i in range(0, self.get_length()):
+                self.raw_packet = self.raw_packet + b'\x00'
+            self.parent_packet = None
+        elif isinstance(packet, Packeter):
             self.raw_packet = packet.packet
             self.parent_packet = packet
         else:
@@ -13,6 +18,12 @@ class Packeter:
             self.packet = self.raw_packet[offset: offset + len]
         #print("Raw packet", self.raw_packet, "packet", self.packet)
 
-
-
+    def get_length(self):
+        from .types import base
+        total_len = 0
+        for item in self.__class__.__dict__.values():
+            if isinstance(item, base.Type):
+                if item.length > 0:
+                    total_len = total_len + item.length
+        return total_len
 

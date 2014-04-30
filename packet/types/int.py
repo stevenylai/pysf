@@ -13,6 +13,6 @@ class IntType(base.Type):
     def __set__(self, obj, val):
         result = b''
         for i in range(0, self.length):
-            result = result + bytes(chr(val % 256), 'utf-8')
+            result = result + bytes([val % 256])
             val = val >> 8
         super(IntType, self).__set__(obj, result)
