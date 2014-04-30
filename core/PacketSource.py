@@ -32,8 +32,8 @@ import signal
 import sys
 import traceback
 
-from IO import *
-from ThreadTask import *
+from .IO import *
+from .ThreadTask import *
 from threading import Semaphore
 
 DEBUG = False

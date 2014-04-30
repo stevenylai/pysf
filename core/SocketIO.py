@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2005-2006
+# Copyright (c) 2005
 #      The President and Fellows of Harvard College.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -28,51 +28,53 @@
 #
 # Author: Geoffrey Mainland <mainland@eecs.harvard.edu>
 #
-import re
 import socket
 
-from PacketSource import *
-from SFProtocol import *
-from SocketIO import *
+from .IO import *
 
-class SFSource(PacketSource):
-    def __init__(self, dispatcher, args):
-        PacketSource.__init__(self, dispatcher)
+class SocketIO(IO):
+    def __init__(self, host, port):
+        IO.__init__(self)
 
-        m = re.match(r'(.*):(.*)', args)
-        if m == None:
-            raise PacketSourceException("bad arguments")
+        self.done = False
 
-        (host, port) = m.groups()
-        port = int(port)
+        self.host = host
+        self.port = port
 
-        self.io = SocketIO(host, port)
-        self.prot = SFProtocol(self.io, self.io)
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket.setsockopt(socket.IPPROTO_TCP,
+                               socket.TCP_NODELAY,
+                               1)
+        self.socket.settimeout(1)
+        self.socket.bind(("", 0))
 
     def cancel(self):
         self.done = True
-        self.io.cancel()
 
-    def open(self, key=b''):
-        self.io.open()
-        self.prot.open(key)
-        PacketSource.open(self)
+    def open(self):
+        print ("SocketIO: Connecting socket to "+str(self.host)+":"+str(self.port))
+        self.socket.connect((self.host, self.port))
+        self.socket.settimeout(1)
 
     def close(self):
-        self.io.close()
+        self.socket.close()
+        self.socket = None
 
-    def readPacket(self):
-        return self.prot.readPacket()
+    def read(self, count):
+        data = b""
+        while count - len(data) > 0:
+            if self.isDone():
+                raise IODone()
 
-    def writePacket(self, packet):
-        self.prot.writePacket(packet)
+            try:
+                data += self.socket.recv(count - len(data))
+            except:
+                pass
 
-if __name__ == '__main__':
-    sf = SFSource(None, '192.168.1.33:3000')
-    sf.open()
-    while True:
-        packet = sf.readPacket()
-        print("Packet: ", end="")
-        for b in packet:
-            print('{0:02X}'.format(b), end="")
-        print("")
+        return data
+
+    def write(self, data):
+        return self.socket.send(data)
+
+    def flush(self):
+        pass
