@@ -53,9 +53,9 @@ class SFSource(PacketSource):
         self.done = True
         self.io.cancel()
 
-    def open(self):
+    def open(self, key=b''):
         self.io.open()
-        self.prot.open()
+        self.prot.open(key)
         PacketSource.open(self)
 
     def close(self):
@@ -68,7 +68,7 @@ class SFSource(PacketSource):
         self.prot.writePacket(packet)
 
 if __name__ == '__main__':
-    sf = SFSource(None, '192.168.1.26:3000')
+    sf = SFSource(None, '192.168.1.33:3000')
     sf.open()
     while True:
         packet = sf.readPacket()

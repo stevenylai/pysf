@@ -28,6 +28,7 @@
 #
 # Author: Geoffrey Mainland <mainland@eecs.harvard.edu>
 #
+import hashlib
 VERSION = "U"
 SUBVERSION = " "
 
@@ -43,7 +44,28 @@ class SFProtocol:
         self.outs = outs
         self.platform = None
 
-    def open(self):
+    def digest(self, message, key):
+        hasher = hashlib.sha256()
+        hasher.update(key)
+        hasher.update(message)
+        digest = hasher.digest()
+
+        hasher = hashlib.sha256()
+        hasher.update(digest)
+        return hasher.digest()
+
+    def auth_client(self, key):
+        print("Auth client")
+        challenge = b''
+        item = self.ins.read(1)
+        while item != b'\x00':
+            challenge = challenge + item
+            item = self.ins.read(1)
+        print("Challenge:", challenge, "Digest:", self.digest(challenge, key))
+
+        self.outs.write(self.digest(challenge, key))
+
+    def open(self, key):
         self.outs.write(bytes(VERSION + SUBVERSION, 'utf-8'))
         partner = self.ins.read(2).decode('utf-8')
         if partner[0] != VERSION:
@@ -56,6 +78,8 @@ class SFProtocol:
         if self.platform == None:
             self.platform = PLATFORM_UNKNOWN
 
+        self.auth_client(key)
+        print("Client authed")
         # In tinyox-1.x, we then exchanged platform information
 
         # the tinyos-2.x serial forwarder doesn't do that, so the
