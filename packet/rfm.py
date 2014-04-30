@@ -1,28 +1,18 @@
 from . import base
+from .types import int
+from .types import subpacket
+
+RFM_SOCKET_DATA = 0x26
+RFM_SOCKET_STATUS = 0x20
+RFM_SOCKET_EXIST = 0x10
 
 class Packeter(base.Packeter):
-    RFM_SRC = (0, 3)
-    RFM_DEST = (4, 3)
-    RFM_TYPE = (3, 1)
-    RFM_LENGTH = (7, 1)
-    RFM_PAYLOAD = 8
-
-    @property
-    def type(self):
-        return self.get_int(self.RFM_TYPE[0], self.RFM_TYPE[1])
-
-    @property
-    def length(self):
-        return self.get_int(self.RFM_LENGTH[0], self.RFM_LENGTH[1])
-
-    @property
-    def src(self):
-        return self.get_int(self.RFM_SRC[0], self.RFM_SRC[1])
-
-    @property
-    def dest(self):
-        return self.get_int(self.RFM_DEST[0], self.RFM_DEST[1])
-
-    @property
-    def payload(self):
-        return self.packet[self.RFM_PAYLOAD:]
+    src = int.IntType(0, 3)
+    dest = int.IntType(4, 3)
+    type = int.IntType(3, 1)
+    length = int.IntType(7, 1)
+    payload = subpacket.Subpacket(('type', 'payload'),
+                                  {RFM_SOCKET_DATA : 'rfm_socket_data',
+                                   RFM_SOCKET_STATUS : 'rfm_socket_status',
+                                   RFM_SOCKET_EXIST : 'rfm_socket_status'},
+                                  8)

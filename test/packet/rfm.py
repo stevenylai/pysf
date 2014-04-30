@@ -1,17 +1,25 @@
 import select
 
+def dump_rfm(packet):
+    from ...packet import rfm
+    print("RFM src:", hex(packet.src),
+          "type:", hex(packet.type),
+          "dest:", hex(packet.dest),
+          "len:", packet.length)
+    if packet.type == rfm.RFM_SOCKET_DATA:
+        print("Socket voltage:", packet.payload.voltage,
+              "current:", packet.payload.current,
+              "power:", packet.payload.power,
+              "freq:", packet.payload.freq)
+    elif packet.type == rfm.RFM_SOCKET_STATUS or packet.type == rfm.RFM_SOCKET_EXIST:
+        print("Socket status:", hex(packet.payload.status))
 
-def dump_pkt(extractor):
-    print("pkt type:", extractor.type,
-          "header len:", extractor.header_length,
-          "payload len:", extractor.payload_length,
-          "payload:", extractor.payload)
-def dump_rfm(extractor):
-    print("src:", hex(extractor.src),
-          "type:", hex(extractor.type),
-          "dest:", hex(extractor.dest),
-          "len:", hex(extractor.length),
-          "payload:", extractor.payload)
+def dump_pkt(packet):
+    #print("PKT type:", hex(packet.type),
+          #"header len:", packet.header_length,
+          #"payload len:", packet.payload_length)
+    dump_rfm(packet.payload)
+
 if __name__ == '__main__':
     from ...core.SFSource import SFSource
     from ...packet import pkt
@@ -22,6 +30,5 @@ if __name__ == '__main__':
         r,w,x = select.select([sf], [], [])
         if len(r) > 0:
             packet = sf.readPacket()
-            extractor = pkt.Packeter(packet)
-            extractor = rfm.Packeter(extractor.payload)
-            dump_rfm(extractor)
+            packet = pkt.Packeter(packet)
+            dump_pkt(packet)
