@@ -1,11 +1,11 @@
-class Packeter:
+class Packet:
     def __init__(self, packet, offset = 0, len = -1):
         if packet == None:
             self.raw_packet = b''
             for i in range(0, self.get_length()):
                 self.raw_packet = self.raw_packet + b'\x00'
             self.parent_packet = None
-        elif isinstance(packet, Packeter):
+        elif isinstance(packet, Packet):
             self.raw_packet = packet.packet
             self.parent_packet = packet
         else:

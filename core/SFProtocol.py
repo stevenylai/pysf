@@ -95,10 +95,11 @@ class SFProtocol:
         return packet
 
     def writePacket(self, packet):
-        if len(packet) > 255:
+        if len(packet) > 65535:
             raise SFProtocolException("packet too long")
 
-        self.outs.write(bytes(chr(len(packet)), 'utf-8'))
+        self.outs.write(bytes(chr(len(packet) & 0xFF), 'utf-8'))
+        self.outs.write(bytes(chr(len(packet) >> 8), 'utf-8'))
         self.outs.write(packet)
         self.outs.flush()
         

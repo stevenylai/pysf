@@ -15,7 +15,7 @@ class Subpacket(base.Type):
             return None
         else:
             guess_pkg = importlib.import_module("." + self.type_table[type_key], _parent_package)
-            guess_cls = getattr(guess_pkg, 'Packeter')
+            guess_cls = getattr(guess_pkg, 'Packet')
             packet = guess_cls(obj, self.offset, self.length)
             packet.name = self.name[1]
             return packet
