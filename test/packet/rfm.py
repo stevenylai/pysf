@@ -25,12 +25,13 @@ def listen():
     from ...core.SFSource import SFSource
     from ...packet import pkt
     from ...packet import rfm
-    sf = SFSource(None, '192.168.1.41:3000')
+    sf = SFSource(None, '192.168.1.33:3000')
     sf.open()
     while True:
         r,w,x = select.select([sf], [], [])
         if len(r) > 0:
             packet = sf.readPacket()
+            print("Raw packet:", packet)
             packet = pkt.Packet(packet)
             dump_pkt(packet)
 
@@ -45,7 +46,7 @@ def gen_packet():
     socket_data.freq = 50
     socket_data.power = 3000
     print(socket_data.packet)
-    socket_status = rfm_socket_status.Packet(b'\x00\x00\x00\x00\x00\x00\x00\x00', 0)
+    socket_status = rfm_socket_status.Packet(bytes(8), 0)
     socket_status.status = socket_status.STATUS_MANUAL_OFF
     rfm_packet = rfm.Packet(None, 0)
     rfm_packet.dest = 0x181818
@@ -64,7 +65,7 @@ def gen_packet():
 
 def write():
     from ...core.SFSource import SFSource
-    sf = SFSource(None, '192.168.1.41:3000')
+    sf = SFSource(None, '192.168.1.33:3000')
     sf.open()
     while True:
         packet = gen_packet()
@@ -73,6 +74,6 @@ def write():
         time.sleep(1)
 
 if __name__ == '__main__':
-    #listen()
+    listen()
     #gen_packet()
-    write()
+    #write()
