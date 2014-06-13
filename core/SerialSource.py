@@ -32,11 +32,10 @@ import re
 import socket
 import sys
 
-from PacketSource import *
-from Platform import *
-from SerialProtocol import *
+from .PacketSource import *
+from .SerialProtocol import *
 if sys.platform != 'cygwin':
-    from SerialIO import *
+    from .SerialIO import *
 
 class SerialSource(PacketSource):
     def __init__(self, dispatcher, args):
@@ -49,16 +48,14 @@ class SerialSource(PacketSource):
         (device, name) = m.groups()
         if re.match(r'^\d+$', name):
             baud = int(name)
-            self.factory = default_factory()
         else:
-            try:
-                baud = baud_from_name(name)
-                self.factory = factory_from_name(name)
-            except:
-                raise PacketSourceException("bad source: %s" % name)
+            raise PacketSourceException("bad source: %s" % name)
 
         self.io = SerialIO(device, baud)
         self.prot = SerialProtocol(self.io, self.io)
+
+    def fileno(self):
+        return self.io.serial.fileno()
 
     def cancel(self):
         self.done = True

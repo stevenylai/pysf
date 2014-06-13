@@ -30,7 +30,7 @@
 #
 import serial
 
-from IO import *
+from .IO import *
 
 class SerialIO(IO):
 	def __init__(self, device, baud):
@@ -41,7 +41,7 @@ class SerialIO(IO):
 	
 	def open(self):
 		self.serial = serial.Serial(port=self.device,
-	                                baudrate=self.baud)
+                                            baudrate=self.baud)
 	
 	def close(self):
 		self.serial.close()
