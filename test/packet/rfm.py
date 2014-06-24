@@ -63,6 +63,34 @@ def gen_packet():
     print(pkt_packet.packet)
     return pkt_packet.packet
 
+def ping_pong(sf_addr, max_retrial):
+    from ...core.SFSource import SFSource
+    sf = SFSource(None, sf_addr)
+    sf.open()
+    trial = 0
+    passed = False
+    while trial < max_retrial and not passed:
+        packet = gen_packet()
+        sf.writePacket(packet)
+        remain = 1.0
+        start = time.time()
+        while remain > 0 and not passed:
+            r,w,x = select.select([sf], [], [], remain)
+            if len(r) > 0:
+                packet = sf.readPacket()
+                print("Raw packet:", packet)
+                #Check packet here
+            end = time.time()
+            remain = remain - (end - start)
+        if not passed:
+            print("Rerunning test")
+            trial += 1
+    if not passed:
+        print("Failed")
+    else:
+        print("Succeeded")
+    sf.close()
+
 def write():
     from ...core.SFSource import SFSource
     sf = SFSource(None, '192.168.1.33:3000')
@@ -74,6 +102,7 @@ def write():
         time.sleep(1)
 
 if __name__ == '__main__':
-    listen()
+    ping_pong('192.168.0.17:3000', 2)
+    #listen()
     #gen_packet()
     #write()
