@@ -88,9 +88,9 @@ class SFProtocol:
 
 
     def readPacket(self):
-        size_l = self.ins.read(1)
-        size_h = self.ins.read(1)
-        size = ord(size_h) << 8 | ord(size_l)
+        size_l = self.ins.read(1)[0]
+        size_h = self.ins.read(1)[0]
+        size = size_h << 8 | size_l
         packet = self.ins.read(size)
         return packet
 
@@ -98,8 +98,7 @@ class SFProtocol:
         if len(packet) > 65535:
             raise SFProtocolException("packet too long")
 
-        self.outs.write(bytes(chr(len(packet) & 0xFF), 'utf-8'))
-        self.outs.write(bytes(chr(len(packet) >> 8), 'utf-8'))
+        self.outs.write(bytes([len(packet) & 0xFF, len(packet) >> 8]))
         self.outs.write(packet)
         self.outs.flush()
         

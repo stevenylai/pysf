@@ -70,7 +70,7 @@ class RXThread(Thread):
                 pdataOffset = 1
                 if frameType == P_PACKET_ACK:
                     # send an ACK
-                    self.prot.writeFramedPacket(P_ACK, frame[1], b"", 0)
+                    self.prot.writeFramedPacket(P_ACK, frame[1], b"")
                     pdataOffset = 2
                 packet = frame[pdataOffset:]
                 
@@ -125,8 +125,11 @@ class SerialProtocol:
         
     def readPacket(self):
         with self.dataCV:
-            self.dataCV.wait()
-            return self.lastData
+            if self.lastData == None:
+                self.dataCV.wait()
+            data = self.lastData
+            self.lastData = None
+            return data
 
     def readFramedPacket(self):
         count = 0
@@ -184,8 +187,11 @@ class SerialProtocol:
                 computedCrc = crc(packet)
 
                 if DEBUG:
-                    print (" len: %d" % (len(receiveBuffer)))
-                    print (" rcrc: %x ccrc: %x" % (readCrc, computedCrc))
+                    print (" len: %d" % (len(receiveBuffer)), end="")
+                    print (" rcrc: %x ccrc: %x: " % (readCrc, computedCrc), end="")
+                    for b in receiveBuffer:
+                        print(hex(b), end="")
+                    print("")
 
                 if readCrc == computedCrc:
                     return packet
@@ -230,8 +236,9 @@ class SerialProtocol:
         crc = crcByte(crc, frameType)
         frame += self.escape(frameType)
 
-        crc = crcByte(crc, sn)
-        frame += self.escape(sn)
+        if frameType == P_PACKET_ACK or frameType == P_ACK:
+            crc = crcByte(crc, sn)
+            frame += self.escape(sn)
 
         for c in data:
             crc = crcByte(crc, c)
@@ -244,11 +251,12 @@ class SerialProtocol:
         if DEBUG:
             print ("Framed Write: (%x) "%sn+" ".join(map(hex, frame)))
         self.outs.write(frame)
-        with self.ackCV:
-            self.ackCV.wait(0.25)
-            if not self.lastAck or self.lastAck[0] != sn:
-                raise NoAckException("No serial ACK received")
-            self.lastAck = None
+        if frameType == P_PACKET_ACK:
+            with self.ackCV:
+                self.ackCV.wait(0.25)
+                if not self.lastAck or self.lastAck[0] != sn:
+                    raise NoAckException("No serial ACK received")
+                self.lastAck = None
 
 
     def escape(self, c):

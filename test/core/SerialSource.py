@@ -25,7 +25,7 @@ def test_write(sf):
         dump_packet(packet)
         sf.writePacket(packet)
         counter = (counter + 1) % 256
-        time.sleep(1)
+        time.sleep(0.5)
         
 def test_echo(sf):
     counter = 0
@@ -34,20 +34,18 @@ def test_echo(sf):
         print("Sending: ", end="")
         dump_packet(packet)
         sf.writePacket(packet)
-        r,w,x = select.select([sf], [], [])
-        if len(r) > 0:
-            packet = sf.readPacket()
-            print("Reading back: ", end="")
-            dump_packet(packet)
-        counter = counter + 1
-        break
+        packet = sf.readPacket()
+        print("Reading back: ", end="")
+        dump_packet(packet)
+        counter = (counter + 1) % 256
+        #time.sleep(0.5)
 
 
 if __name__ == '__main__':
     from ...core.SerialSource import SerialSource
     from ...core import SerialProtocol
     SerialProtocol.DEBUG = True
-    sf = SerialSource(None, '/dev/ttyS0:9600')
+    sf = SerialSource(None, '/dev/ttyS0:115200')
     sf.open()
-    test_write(sf)
+    test_echo(sf)
     sf.close()
