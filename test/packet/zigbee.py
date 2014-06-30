@@ -3,11 +3,11 @@ def gen_packet():
     from ...packet import zigbee
     from ...packet import pkt
     zigbee_req = zigbee_simple.Packet(None, 0)
-    zigbee_req.status = zigbee_req.ZB_RES_OK
+    zigbee_req.status = zigbee_req.ZB_REQ
     #print(zigbee_req.packet)
     zigbee_packet = zigbee.Packet(bytes(14 + len(zigbee_req.packet)), 0)
     zigbee_packet.mac_addr = 0x0102030405060708
-    zigbee_packet.type = zigbee_packet.TYPE_ZB_PAIR
+    zigbee_packet.type = zigbee_packet.TYPE_ZB_ON
     zigbee_packet.seq = 0xE
     zigbee_packet.length = len(zigbee_req.packet)
     zigbee_packet.payload = zigbee_req.packet
