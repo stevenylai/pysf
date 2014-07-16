@@ -20,10 +20,10 @@ class Packet:
 
     def get_length(self):
         from .types import base
-        total_len = 0
+        max_len = 0
         for item in self.__class__.__dict__.values():
             if isinstance(item, base.Type):
-                if item.length > 0:
-                    total_len = total_len + item.length
-        return total_len
+                if item.length > 0 and item.offset + item.length > max_len:
+                    max_len = item.offset + item.length
+        return max_len
 

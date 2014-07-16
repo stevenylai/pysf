@@ -2,6 +2,9 @@ from . import base
 from .types import int
 from .types import subpacket
 
+def reply_type(type):
+    return type ^ 0x80
+
 class Packet(base.Packet):
     ADDR_BCAST = 0x181818
     TYPE_SOCKET_DATA = 0x26

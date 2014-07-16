@@ -16,7 +16,7 @@ class Type:
         for b in obj.packet:
             if i < self.offset or (self.length >= 0 and i >= self.offset + self.length):
                 new_packet = new_packet + bytes([obj.packet[i]])
-            else:
+            elif j < len(val):
                 new_packet = new_packet + bytes([val[j]])
                 j = j + 1
             i = i + 1

@@ -12,3 +12,5 @@ class Packet(base.Packet):
     ZB_RES_NETWORK_ERROR = 7
     ZB_RES_INVALID_ADDR = 8
     status = int.IntType(0, 1)
+    data = int.IntType(1, 1)
+    mac = int.IntType(1, 8)
