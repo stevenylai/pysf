@@ -10,4 +10,4 @@ class Packet(base.Packet):
     payload_length = int.IntType(6, 2)
     payload = subpacket.Subpacket(('type', 'payload'),
                                   {1: 'rfm',
-                                   0x10002 : 'zigbee_ha'}, 8)
+                                   0x10002 : 'zigbee'}, 8)

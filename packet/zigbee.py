@@ -5,27 +5,18 @@ from .types import subpacket
 class Packet(base.Packet):
     TYPE_ZB_PAIR = 0
     TYPE_ZB_UNPAIR = 1
-    TYPE_ZB_ON = 2
-    TYPE_ZB_OFF = 3
-    TYPE_ZB_LEVEL = 4
+    TYPE_ZB_RESOLVE = 2
+    TYPE_ZB_LEAVE = 3
 
-    TYPE_ZB_RESOLVE = 5
-    TYPE_ZB_LEAVE = 6
-    TYPE_ZB_QUERY_ON_OFF = 7
-    TYPE_ZB_QUERY_LEVEL = 8
+    TYPE_ZB_CLUSTER_COMMAND = 4
+    TYPE_ZB_ATTR_READ = 5
 
-    addr = int.IntType(0, 2)
-    end_point = int.IntType(2, 1)
-    type = int.IntType(3, 2)
-    length = int.IntType(5, 2)
+    type = int.IntType(0, 2)
+    length = int.IntType(2, 2)
     payload = subpacket.Subpacket(('type', 'payload'),
-                                  {TYPE_ZB_PAIR : 'zigbee_simple',
-                                   TYPE_ZB_UNPAIR : 'zigbee_simple',
-                                   TYPE_ZB_RESOLVE : 'zigbee_simple',
-                                   TYPE_ZB_LEAVE : 'zigbee_simple',
-                                   TYPE_ZB_ON : 'zigbee_simple',
-                                   TYPE_ZB_OFF : 'zigbee_simple',
-                                   TYPE_ZB_LEVEL : 'zigbee_simple',
-                                   TYPE_ZB_QUERY_ON_OFF : 'zigbee_simple',
-                                   TYPE_ZB_QUERY_LEVEL : 'zigbee_simple'},
-                                  7)
+                                  {TYPE_ZB_PAIR : 'zigbee_payload',
+                                   TYPE_ZB_UNPAIR : 'zigbee_payload',
+                                   TYPE_ZB_RESOLVE : 'zigbee_payload',
+                                   TYPE_ZB_LEAVE : 'zigbee_payload',
+                                   TYPE_ZB_CLUSTER_COMMAND : 'zigbee_payload'},
+                                  4)
