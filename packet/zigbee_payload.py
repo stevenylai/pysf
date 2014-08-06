@@ -42,6 +42,7 @@ class Packet(base.Packet):
 
     status = int.IntType(0, 1)
     addr_info = struct.Struct(AddrInfo, 'addr_info', 1, 10)
+    #addr_info = raw.RawType(1, 10)
     command = struct.Struct(ZigbeeCommand, 'command', 1, 88)
     #command = raw.RawType(1, 88)
 

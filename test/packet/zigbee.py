@@ -77,6 +77,28 @@ class Zigbee:
         print("Writing:", pkt_pkt.packet)
         self.sf.writePacket(pkt_pkt.packet)
 
+    def unpair(self):
+        from ...packet import zigbee_payload
+        from ...packet import zigbee
+        from ...packet import pkt
+        addr_info = zigbee_payload.AddrInfo(None)
+        addr_info.mac = self.mac
+        addr_info.addr = self.addr
+        zb_payload = zigbee_payload.Packet(bytes(len(addr_info.packet) + 1))
+        zb_payload.status = zb_payload.ZB_REQ
+        zb_payload.addr_info = addr_info.packet
+        zb_pkt = zigbee.Packet(None)
+        zb_pkt.type = zb_pkt.TYPE_ZB_LEAVE
+        zb_pkt.length = len(zb_payload.packet)
+        zb_pkt.payload = zb_payload.packet
+        pkt_pkt = pkt.Packet(None)
+        pkt_pkt.type = pkt_pkt.TYPE_ZIGBEE
+        pkt_pkt.header_length = 0
+        pkt_pkt.payload_length = len(zb_pkt.packet)
+        pkt_pkt.payload = zb_pkt.packet
+        print("Writing:", pkt_pkt.packet)
+        self.sf.writePacket(pkt_pkt.packet)
+
     def process_packet(self):
         from ...packet import pkt
         packet = self.sf.readPacket()
@@ -90,11 +112,13 @@ class Zigbee:
 
     def wait_for_addr(self):
         from ...packet import pkt
+        print("Waiting for device")
         while True:
             r,w,x = select.select([self.sf], [], [])
             if len(r) > 0:
                 self.process_packet()
-                break
+                if self.mac != None and self.addr != None:
+                    break
 
 if __name__ == '__main__':
     from ...packet import zigbee
@@ -113,7 +137,13 @@ if __name__ == '__main__':
                     m = re.compile('level([0-9]+)').search(line)
                     if m != None:
                         tester.simple_level(int(m.group(1)))
+                elif line.startswith('unpair'):
+                    tester.unpair()
+                    tester.restart()
+                    break
                 elif line.startswith('quit'):
+                    print("Restarting test")
+                    tester.restart()
                     break
             
     
