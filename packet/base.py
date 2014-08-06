@@ -1,9 +1,10 @@
 class Packet:
     def __init__(self, packet, offset = 0, len = -1):
         if packet == None:
-            self.raw_packet = b''
+            raw_packet_list = []
             for i in range(0, self.get_length()):
-                self.raw_packet = self.raw_packet + b'\x00'
+                raw_packet_list.append(b'\x00')
+            self.raw_packet = b''.join(raw_packet_list)
             self.parent_packet = None
         elif isinstance(packet, Packet):
             self.raw_packet = packet.packet

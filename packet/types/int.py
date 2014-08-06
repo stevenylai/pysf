@@ -11,8 +11,8 @@ class IntType(base.Type):
         return result
 
     def __set__(self, obj, val):
-        result = b''
+        result = []
         for i in range(0, self.length):
-            result = result + bytes([val % 256])
+            result.append(bytes([val % 256]))
             val = val >> 8
-        super(IntType, self).__set__(obj, result)
+        super(IntType, self).__set__(obj, b''.join(result))

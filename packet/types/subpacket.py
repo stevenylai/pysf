@@ -18,4 +18,5 @@ class Subpacket(base.Type):
             guess_cls = getattr(guess_pkg, 'Packet')
             packet = guess_cls(obj, self.offset, self.length)
             packet.name = self.name[1]
+            packet.parent_packet = obj
             return packet

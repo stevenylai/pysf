@@ -26,6 +26,6 @@ class Type:
                 j = j + 1
         obj.packet = new_packet
         if obj.parent_packet != None: #Attribute of a sub packet
-            print("Changing ", obj.name, "of parent to:", obj.packet)
+            #print("Changing ", obj.name, "of parent to:", obj.packet)
             obj.parent_packet.__class__.__dict__[obj.name].__set__(obj.parent_packet, obj.packet)
     
