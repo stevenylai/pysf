@@ -16,7 +16,7 @@ class Zigbee:
 
     def __init__(self, port):
         from ...core.SFSource import SFSource
-        self.end_point = 8
+        self.end_point = 1
         self.restart()
         self.sf = SFSource(None, port)
         self.sf.open()
