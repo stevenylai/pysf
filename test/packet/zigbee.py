@@ -14,12 +14,13 @@ class Zigbee:
     ZCL_FRAME_CLIENT_SERVER_DIR = 0x00
     ZCL_FRAME_SERVER_CLIENT_DIR = 0x01
 
-    def __init__(self, port):
+    def __init__(self, port, key = b''):
         from ...core.SFSource import SFSource
         self.end_point = 1
         self.restart()
         self.sf = SFSource(None, port)
-        self.sf.open()
+        self.key = key
+        self.sf.open(self.key)
 
     def restart(self):
         self.mac = None
@@ -109,6 +110,28 @@ class Zigbee:
                 self.mac = zb_packet.payload.addr_info.mac
                 self.addr = zb_packet.payload.addr_info.addr
                 print("New device detected:", hex(self.mac), hex(self.addr))
+            elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ:
+                resp = zb_packet.payload.resp
+                self.process_read(resp)
+
+    def process_read(self, resp):
+        if resp.src.mode != resp.src.ADDR_16BIT:
+            return
+        if resp.num_attr == 0:
+            return
+        attr_list = resp.attr_list
+        if resp.cluster_id == self.ZCL_CLUSTER_ID_GEN_ON_OFF:
+            for attr in attr_list:
+                if attr.attr_id == attr.ATTRID_ON_OFF:
+                    on_off = (attr.data & 0xFF)
+                    print("on_off for", hex(resp.src.short_addr), on_off)
+                    break
+        elif resp.cluster_id == self.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL:
+            for attr in attr_list:
+                if attr.attr_id == attr.ATTRID_LEVEL_CURRENT_LEVEL:
+                    level = (attr.data & 0xFF)
+                    print("level for", hex(resp.src.short_addr), level)
+                    break
 
     def wait_for_addr(self):
         from ...packet import pkt
@@ -120,9 +143,13 @@ class Zigbee:
                 if self.mac != None and self.addr != None:
                     break
 
-if __name__ == '__main__':
-    from ...packet import zigbee
-    tester = Zigbee('localhost:3000')
+def read_device(tester):
+    while True:
+        r,w,x = select.select([tester.sf], [], [])
+        if len(r) > 0:
+            tester.process_packet()
+
+def test_device(tester):
     while True:
         tester.wait_for_addr()
         while True:
@@ -145,5 +172,11 @@ if __name__ == '__main__':
                     print("Restarting test")
                     tester.restart()
                     break
+
+if __name__ == '__main__':
+    from ...packet import zigbee
+    tester = Zigbee('127.0.0.1:3000', b'620fca1edf4040248f27ba326e784e1e')
+    #test_device(tester)
+    read_device(tester)
             
     

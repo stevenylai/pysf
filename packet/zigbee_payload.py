@@ -1,6 +1,7 @@
 from . import base
 from .types import int
 from .types import struct
+from .types import array
 from .types import raw
 
 class ZigbeeAddr(base.Packet):
@@ -20,6 +21,15 @@ class AddrInfo(base.Packet):
     mac = int.IntType(0, 8)
     addr = int.IntType(8, 2)
 
+class ZigbeeAttr(base.Packet):
+    ATTRID_ON_OFF = 0
+    ATTRID_LEVEL_CURRENT_LEVEL = 0
+
+    attr_id = int.IntType(0, 2)
+    status = int.IntType(2, 1)
+    data_type = int.IntType(3, 1)
+    data = int.IntType(4, 8)
+
 class ZigbeeCommand(base.Packet):
     src_ep = int.IntType(0, 1)
     dest = struct.Struct(ZigbeeAddr, 'dest', 1, 12)
@@ -32,7 +42,20 @@ class ZigbeeCommand(base.Packet):
     seq = int.IntType(21, 1)
     cmd_fmt_len = int.IntType(22, 2)
     cmd_fmt = raw.RawType(24, 64)
-    
+
+class ZigbeeRead(base.Packet):
+    event = int.IntType(0, 1)
+    status = int.IntType(1, 1)
+    frame_control = int.IntType(2, 1)
+    manu_code = int.IntType(3, 2)
+    seq = int.IntType(5, 1)
+    command_id = int.IntType(6, 1)
+    cluster_id = int.IntType(7, 2)
+    src = struct.Struct(ZigbeeAddr, 'src', 9, 12)
+    end_point = int.IntType(21, 1)
+    num_attr = int.IntType(22, 1)
+    attr_list = array.Array(ZigbeeAttr, 'attr_list', 23, 2)
+
 class Packet(base.Packet):
     ZB_REQ = 0
     ZB_RES_OK = 1
@@ -42,9 +65,8 @@ class Packet(base.Packet):
 
     status = int.IntType(0, 1)
     addr_info = struct.Struct(AddrInfo, 'addr_info', 1, 10)
-    #addr_info = raw.RawType(1, 10)
     command = struct.Struct(ZigbeeCommand, 'command', 1, 88)
-    #command = raw.RawType(1, 88)
+    resp = struct.Struct(ZigbeeRead, 'resp', 1, 47)
 
 if __name__ == '__main__':
     p = Packet(b'\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b')
