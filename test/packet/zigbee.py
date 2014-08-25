@@ -3,10 +3,24 @@ import re
 import time
 import select
 
+class ZigbeeReportConfig:
+    ZCL_SEND_ATTR_REPORTS = 0
+    ZCL_EXPECT_ATTR_REPORTS = 1
+
+    direction = 0
+    attr_id = 0
+    type = 0
+    min_interval = 0
+    max_interval = 0
+    timeout = 0
+    threshold = b''
+
 class Zigbee:
     ZCL_CLUSTER_ID_GEN_ON_OFF = 0x6
     ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL = 0x8
 
+    ZCL_CMD_READ = 0x00
+    ZCL_CMD_CONFIG_REPORT = 0x06
     COMMAND_OFF = 0x00
     COMMAND_ON = 0x01
     COMMAND_LEVEL_MOVE_TO_LEVEL = 0x0
@@ -45,10 +59,55 @@ class Zigbee:
     def simple_level(self, level):
         self.level(self.COMMAND_LEVEL_MOVE_TO_LEVEL, 1, level, 0)
 
+    def simple_send_read(self, cluster_id, attrs):
+        self.send_read(self.end_point, cluster_id, attrs, self.ZCL_FRAME_CLIENT_SERVER_DIR, 0)
+
+    def send_read(self, src_ep, cluster_id, attrs, dir, seq):
+        buf = []
+        for attr in attrs:
+            buf.append(attr & 0xFF)
+            buf.append(attr >> 8)
+        buf = bytes(buf)
+        #print(buf)
+        self.send_command(src_ep, cluster_id, self.ZCL_CMD_READ, 0, dir, seq, buf)
+
+    def send_config_report_cmd(self, cluster_id, cfg_reports, dir, seq):
+        from ...packet import zigbee_payload
+        from ...packet import zigbee
+        cmd_buf = []
+        for config in cfg_reports:
+            cmd_buf.append(config.direction)
+            cmd_buf.append(config.attr_id & 0xFF)
+            cmd_buf.append(config.attr_id >> 8 & 0xFF)
+            if config.direction == config.ZCL_SEND_ATTR_REPORTS:
+                cmd_buf.append(config.min_interval & 0xFF)
+                cmd_buf.append(config.min_interval >> 8 & 0xFF)
+                cmd_buf.append(config.max_interval & 0xFF)
+                cmd_buf.append(config.max_interval >> 8 & 0xFF)
+                cmd_buf += [b for b in config.threshold]
+            else:
+                cmd_buf.append(config.timeout & 0xFF)
+                cmd_buf.append(config.timeout >> 8 & 0xFF)
+        self.send_command(self.end_point, cluster_id, self.ZCL_CMD_CONFIG_REPORT, 0, dir, seq, bytes(cmd_buf))
+
+    def write_zigbee_payload(self, payload, type):
+        from ...packet import zigbee
+        from ...packet import pkt
+        zb_pkt = zigbee.Packet(None)
+        zb_pkt.type = type
+        zb_pkt.length = len(payload.packet)
+        zb_pkt.payload = payload.packet
+        pkt_pkt = pkt.Packet(None)
+        pkt_pkt.type = pkt_pkt.TYPE_ZIGBEE
+        pkt_pkt.header_length = 0
+        pkt_pkt.payload_length = len(zb_pkt.packet)
+        pkt_pkt.payload = zb_pkt.packet
+        print(int(time.time()), "Writing:", pkt_pkt.packet)
+        self.sf.writePacket(pkt_pkt.packet)
+
     def send_command(self, src_ep, cluster_id, cmd, specific, dir, seq, cmd_fmt):
         from ...packet import zigbee_payload
         from ...packet import zigbee
-        from ...packet import pkt
         zb_payload = zigbee_payload.Packet(None)
         zb_payload.status = zb_payload.ZB_REQ
         zb_payload.command.src_ep = src_ep
@@ -66,39 +125,61 @@ class Zigbee:
         zb_payload.command.cmd_fmt_len = len(cmd_fmt)
         zb_payload.command.cmd_fmt = cmd_fmt
         #print(zb_payload.packet)
-        zb_pkt = zigbee.Packet(None)
-        zb_pkt.type = zb_pkt.TYPE_ZB_CLUSTER_COMMAND
-        zb_pkt.length = len(zb_payload.packet)
-        zb_pkt.payload = zb_payload.packet
-        pkt_pkt = pkt.Packet(None)
-        pkt_pkt.type = pkt_pkt.TYPE_ZIGBEE
-        pkt_pkt.header_length = 0
-        pkt_pkt.payload_length = len(zb_pkt.packet)
-        pkt_pkt.payload = zb_pkt.packet
-        print("Writing:", pkt_pkt.packet)
-        self.sf.writePacket(pkt_pkt.packet)
+        self.write_zigbee_payload(zb_payload, zigbee.Packet.TYPE_ZB_CLUSTER_COMMAND)
+
+    def resolve(self, mac):
+        from ...packet import zigbee_payload
+        from ...packet import zigbee
+        addr_info = zigbee_payload.AddrInfo(None)
+        addr_info.mac = mac
+        addr_info.addr = 0
+        zb_payload = zigbee_payload.Packet(bytes(len(addr_info.packet) + 1))
+        zb_payload.status = zb_payload.ZB_REQ
+        zb_payload.addr_info = addr_info.packet
+        self.write_zigbee_payload(zb_payload, zigbee.Packet.TYPE_ZB_RESOLVE)
 
     def unpair(self):
         from ...packet import zigbee_payload
         from ...packet import zigbee
-        from ...packet import pkt
         addr_info = zigbee_payload.AddrInfo(None)
         addr_info.mac = self.mac
         addr_info.addr = self.addr
         zb_payload = zigbee_payload.Packet(bytes(len(addr_info.packet) + 1))
         zb_payload.status = zb_payload.ZB_REQ
         zb_payload.addr_info = addr_info.packet
-        zb_pkt = zigbee.Packet(None)
-        zb_pkt.type = zb_pkt.TYPE_ZB_LEAVE
-        zb_pkt.length = len(zb_payload.packet)
-        zb_pkt.payload = zb_payload.packet
-        pkt_pkt = pkt.Packet(None)
-        pkt_pkt.type = pkt_pkt.TYPE_ZIGBEE
-        pkt_pkt.header_length = 0
-        pkt_pkt.payload_length = len(zb_pkt.packet)
-        pkt_pkt.payload = zb_pkt.packet
-        print("Writing:", pkt_pkt.packet)
-        self.sf.writePacket(pkt_pkt.packet)
+        self.write_zigbee_payload(zb_payload, zigbee.Packet.TYPE_ZB_LEAVE)
+
+    def bind(self, cluster_id):
+        from ...packet import zigbee_payload
+        from ...packet import zigbee
+        bind = zigbee_payload.ZigbeeBind(None)
+        bind.mac = self.mac
+        bind.addr = self.addr
+        bind.end_point = self.end_point
+        bind.type = bind.TYPE_BIND_BIND
+        bind.cluster_id = cluster_id
+        zb_payload = zigbee_payload.Packet(bytes(len(bind.packet) + 1))
+        zb_payload.status = zb_payload.ZB_REQ
+        zb_payload.bind = bind.packet
+        self.write_zigbee_payload(zb_payload, zigbee.Packet.TYPE_ZB_BIND)
+
+    def report_on_off(self, min, max):
+        from ...packet import zigbee_payload
+        config = ZigbeeReportConfig()
+        config.direction = config.ZCL_SEND_ATTR_REPORTS
+        config.attr_id = zigbee_payload.ZigbeeAttr.ATTRID_ON_OFF
+        config.min_interval = min
+        config.max_interval = max
+        self.send_config_report_cmd(self.ZCL_CLUSTER_ID_GEN_ON_OFF, [config], self.ZCL_FRAME_CLIENT_SERVER_DIR, 0)
+
+    def report_level(self, min, max):
+        from ...packet import zigbee_payload
+        config = ZigbeeReportConfig()
+        config.direction = config.ZCL_SEND_ATTR_REPORTS
+        config.attr_id = zigbee_payload.ZigbeeAttr.ATTRID_LEVEL_CURRENT_LEVEL
+        config.min_interval = min
+        config.max_interval = max
+        self.send_config_report_cmd(self.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL, [config], self.ZCL_FRAME_CLIENT_SERVER_DIR, 0)
 
     def process_packet(self):
         from ...packet import pkt
@@ -109,29 +190,37 @@ class Zigbee:
             if zb_packet.type == zb_packet.TYPE_ZB_RESOLVE:
                 self.mac = zb_packet.payload.addr_info.mac
                 self.addr = zb_packet.payload.addr_info.addr
-                print("New device detected:", hex(self.mac), hex(self.addr))
-            elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ:
+                print(int(time.time()), "New device detected:", hex(self.mac), hex(self.addr))
+            elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ or zb_packet.type == zb_packet.TYPE_ZB_ATTR_REPORT:
                 resp = zb_packet.payload.resp
-                self.process_read(resp)
+                self.process_read(resp, zb_packet)
 
-    def process_read(self, resp):
+    def process_read(self, resp, zb_packet):
+        from ...packet import zigbee_payload
         if resp.src.mode != resp.src.ADDR_16BIT:
             return
         if resp.num_attr == 0:
             return
-        attr_list = resp.attr_list
+        header = str(int(time.time()))
+        if zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ:
+            header += " read "
+        elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_REPORT:
+            header += " report "
+        attr_data = resp.attr_data
         if resp.cluster_id == self.ZCL_CLUSTER_ID_GEN_ON_OFF:
-            for attr in attr_list:
+            for i in range(0, resp.num_attr):
+                attr = zigbee_payload.ZigbeeAttr(attr_data)
                 if attr.attr_id == attr.ATTRID_ON_OFF:
-                    on_off = (attr.data & 0xFF)
-                    print("on_off for", hex(resp.src.short_addr), on_off)
-                    break
+                    on_off = (attr.get_data() & 0xFF)
+                    print(header, "on_off for", hex(resp.src.short_addr), on_off)
+                attr_data = attr_data[attr.get_length():]
         elif resp.cluster_id == self.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL:
-            for attr in attr_list:
+            for i in range(0, resp.num_attr):
+                attr = zigbee_payload.ZigbeeAttr(attr_data)
                 if attr.attr_id == attr.ATTRID_LEVEL_CURRENT_LEVEL:
-                    level = (attr.data & 0xFF)
-                    print("level for", hex(resp.src.short_addr), level)
-                    break
+                    level = (attr.get_data() & 0xFF)
+                    print(header, "level for", hex(resp.src.short_addr), level)
+                attr_data = attr_data[attr.get_length():]
 
     def wait_for_addr(self):
         from ...packet import pkt
@@ -150,33 +239,64 @@ def read_device(tester):
             tester.process_packet()
 
 def test_device(tester):
+    from ...packet import zigbee_payload
     while True:
-        tester.wait_for_addr()
+        #tester.wait_for_addr()
         while True:
-            r,w,x = select.select([sys.stdin], [], [])
-            if len(r) > 0:
-                line = sys.stdin.readline()
-                if line.startswith('on'):
-                    tester.on()
-                elif line.startswith('off'):
-                    tester.off()
-                elif line.startswith('level'):
-                    m = re.compile('level([0-9]+)').search(line)
-                    if m != None:
-                        tester.simple_level(int(m.group(1)))
-                elif line.startswith('unpair'):
-                    tester.unpair()
-                    tester.restart()
-                    break
-                elif line.startswith('quit'):
-                    print("Restarting test")
-                    tester.restart()
-                    break
+            r,w,x = select.select([sys.stdin, tester.sf], [], [])
+            for port in r:
+                if id(port) == id(sys.stdin):
+                    line = sys.stdin.readline()
+                    if line.startswith('resolve'):
+                        m = re.compile(r'resolve[ \t]+([a-fA-FxX0-9]+)').search(line)
+                        if m != None:
+                            tester.resolve(int(m.group(1), 16))
+                    elif line.startswith('on'):
+                        tester.on()
+                    elif line.startswith('off'):
+                        tester.off()
+                    elif line.startswith('level'):
+                        m = re.compile(r'level[ \t]+([0-9]+)').search(line)
+                        if m != None:
+                            tester.simple_level(int(m.group(1)))
+                    elif line.startswith('report'):
+                        m = re.compile(r'report[ \t]+(.+)').search(line)
+                        if m != None:
+                            if m.group(1) == 'level':
+                                tester.report_level(1, 3)
+                            elif m.group(1) == 'on_off':
+                                tester.report_on_off(70, 80)
+                    elif line.startswith('bind'):
+                        m = re.compile(r'bind[ \t]+(.+)').search(line)
+                        if m != None:
+                            if m.group(1) == 'level':
+                                tester.bind(tester.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL)
+                            elif m.group(1) == 'on_off':
+                                tester.bind(tester.ZCL_CLUSTER_ID_GEN_ON_OFF)
+                    elif line.startswith('read'):
+                        m = re.compile(r'read[ \t]+([a-zA-Z_]+)').search(line)
+                        if m != None:
+                            if m.group(1) == 'on_off':
+                                tester.simple_send_read(tester.ZCL_CLUSTER_ID_GEN_ON_OFF, [zigbee_payload.ZigbeeAttr.ATTRID_ON_OFF])
+                            elif m.group(1) == 'level':
+                                tester.simple_send_read(tester.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL, [zigbee_payload.ZigbeeAttr.ATTRID_LEVEL_CURRENT_LEVEL])
+                    elif line.startswith('unpair'):
+                        tester.unpair()
+                        tester.restart()
+                        break
+                    elif line.startswith('quit'):
+                        print("Restarting test")
+                        tester.restart()
+                        break
+                elif id(port) == id(tester.sf):
+                    tester.process_packet()
 
 if __name__ == '__main__':
     from ...packet import zigbee
-    tester = Zigbee('127.0.0.1:3000', b'620fca1edf4040248f27ba326e784e1e')
-    #test_device(tester)
-    read_device(tester)
+    from ...packet import zigbee_payload
+    tester = Zigbee('127.0.0.1:3000', b'6a46f8621a2c48868a0fa33d986a3ed6')
+    test_device(tester)
+    #read_device(tester)
+    #tester.simple_send_read(tester.ZCL_CLUSTER_ID_GEN_ON_OFF, [zigbee_payload.ZigbeeAttr.ATTRID_ON_OFF])
             
     

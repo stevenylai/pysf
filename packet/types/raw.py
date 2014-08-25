@@ -7,6 +7,8 @@ class RawType(base.Type):
         self.length = 0
 
     def __get__(self, obj, objtype):
+        if obj.packet != None and len(obj.packet) > self.offset:
+            self.length = len(obj.packet) - self.offset
         if self.length == 0:
             return b''
         else:
