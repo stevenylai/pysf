@@ -138,16 +138,15 @@ class Zigbee:
         zb_payload.addr_info = addr_info.packet
         self.write_zigbee_payload(zb_payload, zigbee.Packet.TYPE_ZB_RESOLVE)
 
-    def unpair(self):
+    def pair(self, type):
         from ...packet import zigbee_payload
-        from ...packet import zigbee
         addr_info = zigbee_payload.AddrInfo(None)
         addr_info.mac = self.mac
         addr_info.addr = self.addr
         zb_payload = zigbee_payload.Packet(bytes(len(addr_info.packet) + 1))
         zb_payload.status = zb_payload.ZB_REQ
         zb_payload.addr_info = addr_info.packet
-        self.write_zigbee_payload(zb_payload, zigbee.Packet.TYPE_ZB_LEAVE)
+        self.write_zigbee_payload(zb_payload, type)
 
     def bind(self, cluster_id):
         from ...packet import zigbee_payload
@@ -190,7 +189,11 @@ class Zigbee:
             if zb_packet.type == zb_packet.TYPE_ZB_RESOLVE:
                 self.mac = zb_packet.payload.addr_info.mac
                 self.addr = zb_packet.payload.addr_info.addr
-                print(int(time.time()), "New device detected:", hex(self.mac), hex(self.addr))
+                if zb_packet.payload.addr_info.type == zb_packet.payload.addr_info.TYPE_ADDR_JOIN:
+                    type_str = 'join'
+                else:
+                    type_str = 'resolve'
+                print(int(time.time()), type_str, "device:", hex(self.mac), hex(self.addr))
             elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ or zb_packet.type == zb_packet.TYPE_ZB_ATTR_REPORT:
                 resp = zb_packet.payload.resp
                 self.process_read(resp, zb_packet)
@@ -240,6 +243,7 @@ def read_device(tester):
 
 def test_device(tester):
     from ...packet import zigbee_payload
+    from ...packet import zigbee
     while True:
         #tester.wait_for_addr()
         while True:
@@ -281,8 +285,12 @@ def test_device(tester):
                             elif m.group(1) == 'level':
                                 tester.simple_send_read(tester.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL, [zigbee_payload.ZigbeeAttr.ATTRID_LEVEL_CURRENT_LEVEL])
                     elif line.startswith('unpair'):
-                        tester.unpair()
+                        tester.pair(zigbee.Packet.TYPE_ZB_LEAVE)
+                        tester.pair(zigbee.Packet.TYPE_ZB_UNPAIR)
                         tester.restart()
+                        break
+                    elif line.startswith('pair'):
+                        tester.pair(zigbee.Packet.TYPE_ZB_PAIR)
                         break
                     elif line.startswith('quit'):
                         print("Restarting test")

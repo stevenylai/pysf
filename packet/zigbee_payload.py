@@ -18,8 +18,12 @@ class ZigbeeAddr(base.Packet):
     pan_id = int.IntType(10, 2)
 
 class AddrInfo(base.Packet):
-    mac = int.IntType(0, 8)
-    addr = int.IntType(8, 2)
+    TYPE_ADDR_JOIN = 0
+    TYPE_ADDR_RESOLVE = 1
+
+    type = int.IntType(0, 1)
+    mac = int.IntType(1, 8)
+    addr = int.IntType(9, 2)
 
 class ZigbeeBind(base.Packet):
     TYPE_BIND_BIND = 0
@@ -175,7 +179,7 @@ class Packet(base.Packet):
     ZB_RES_NETWORK_ERROR = 4
 
     status = int.IntType(0, 1)
-    addr_info = struct.Struct(AddrInfo, 'addr_info', 1, 10)
+    addr_info = struct.Struct(AddrInfo, 'addr_info', 1, 11)
     bind = struct.Struct(ZigbeeBind, 'bind', 1, 14)
     command = struct.Struct(ZigbeeCommand, 'command', 1, 88)
     resp = struct.Struct(ZigbeeRead, 'resp', 1, 47)
