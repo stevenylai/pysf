@@ -2,6 +2,7 @@ import sys
 import re
 import time
 import select
+import argparse
 
 class ZigbeeReportConfig:
     ZCL_SEND_ATTR_REPORTS = 0
@@ -302,9 +303,14 @@ def test_device(tester):
 if __name__ == '__main__':
     from ...packet import zigbee
     from ...packet import zigbee_payload
-    tester = Zigbee('127.0.0.1:3000', b'6a46f8621a2c48868a0fa33d986a3ed6')
+    parser = argparse.ArgumentParser(description='Zigbee tester.')
+    parser.add_argument('--hub', metavar='ip:port', type=str, nargs='?',
+                        default='127.0.0.1:3000', help='ip:port of the hub running sf')
+    parser.add_argument('--key', metavar='bind_secret', type=str, nargs='?',
+                        default='', help='bind secret of the hub running sf')
+    args = parser.parse_args()
+    print(args.hub, bytes(args.key, 'utf-8'))
+    #tester = Zigbee('192.168.1.26:3000', b'3f2cfb1789a649b1be92fb0a6b2fd0a1')
+    tester = Zigbee(args.hub, bytes(args.key, 'utf-8'))
     test_device(tester)
     #read_device(tester)
-    #tester.simple_send_read(tester.ZCL_CLUSTER_ID_GEN_ON_OFF, [zigbee_payload.ZigbeeAttr.ATTRID_ON_OFF])
-            
-    
