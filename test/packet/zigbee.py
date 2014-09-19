@@ -32,14 +32,15 @@ class Zigbee:
     def __init__(self, port, key = b''):
         from ...core.SFSource import SFSource
         self.end_point = 1
-        self.restart()
+        self.addr_list = []
+        self.addr_sel = -1
         self.sf = SFSource(None, port)
         self.key = key
         self.sf.open(self.key)
 
     def restart(self):
-        self.mac = None
-        self.addr = None
+        self.addr_list.clear()
+        self.addr_sel = -1
 
     def on(self):
         self.send_command(self.end_point, self.ZCL_CLUSTER_ID_GEN_ON_OFF,
@@ -103,7 +104,7 @@ class Zigbee:
         pkt_pkt.header_length = 0
         pkt_pkt.payload_length = len(zb_pkt.packet)
         pkt_pkt.payload = zb_pkt.packet
-        print(int(time.time()), "Writing:", pkt_pkt.packet)
+        print(time.time(), "Writing:", pkt_pkt.packet)
         self.sf.writePacket(pkt_pkt.packet)
 
     def send_command(self, src_ep, cluster_id, cmd, specific, dir, seq, cmd_fmt):
@@ -112,7 +113,7 @@ class Zigbee:
         zb_payload = zigbee_payload.Packet(None)
         zb_payload.status = zb_payload.ZB_REQ
         zb_payload.command.src_ep = src_ep
-        zb_payload.command.dest.short_addr = self.addr
+        zb_payload.command.dest.short_addr = self.addr_list[self.addr_sel][1]
         zb_payload.command.dest.end_point = src_ep
         zb_payload.command.dest.mode = zb_payload.command.dest.ADDR_16BIT
         zb_payload.command.pan_id = 0
@@ -142,8 +143,8 @@ class Zigbee:
     def pair(self, type):
         from ...packet import zigbee_payload
         addr_info = zigbee_payload.AddrInfo(None)
-        addr_info.mac = self.mac
-        addr_info.addr = self.addr
+        addr_info.mac = self.addr_list[self.addr_sel][0]
+        addr_info.addr = self.addr_list[self.addr_sel][1]
         zb_payload = zigbee_payload.Packet(bytes(len(addr_info.packet) + 1))
         zb_payload.status = zb_payload.ZB_REQ
         zb_payload.addr_info = addr_info.packet
@@ -153,8 +154,8 @@ class Zigbee:
         from ...packet import zigbee_payload
         from ...packet import zigbee
         bind = zigbee_payload.ZigbeeBind(None)
-        bind.mac = self.mac
-        bind.addr = self.addr
+        bind.mac = self.addr_list[self.addr_sel][0]
+        bind.addr = self.addr_list[self.addr_sel][1]
         bind.end_point = self.end_point
         bind.type = bind.TYPE_BIND_BIND
         bind.cluster_id = cluster_id
@@ -188,13 +189,19 @@ class Zigbee:
         if packet.type == packet.TYPE_ZIGBEE:
             zb_packet = packet.payload
             if zb_packet.type == zb_packet.TYPE_ZB_RESOLVE:
-                self.mac = zb_packet.payload.addr_info.mac
-                self.addr = zb_packet.payload.addr_info.addr
+                new_addr = (zb_packet.payload.addr_info.mac, zb_packet.payload.addr_info.addr)
+                if new_addr[0] not in [a[0] for a in self.addr_list]:
+                    self.addr_list.append(new_addr)
+                    self.addr_sel = len(self.addr_list) - 1
+                else:
+                    cur_idx = [a[0] for a in self.addr_list].index(new_addr[0])
+                    self.addr_list.remove(self.addr_list[cur_idx])
+                    self.addr_list.insert(cur_idx, new_addr)
                 if zb_packet.payload.addr_info.type == zb_packet.payload.addr_info.TYPE_ADDR_JOIN:
                     type_str = 'join'
                 else:
                     type_str = 'resolve'
-                print(int(time.time()), type_str, "device:", hex(self.mac), hex(self.addr))
+                print(time.time(), type_str, "device:", hex(new_addr[0]), hex(new_addr[1]))
             elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ or zb_packet.type == zb_packet.TYPE_ZB_ATTR_REPORT:
                 resp = zb_packet.payload.resp
                 self.process_read(resp, zb_packet)
@@ -205,7 +212,7 @@ class Zigbee:
             return
         if resp.num_attr == 0:
             return
-        header = str(int(time.time()))
+        header = str(time.time())
         if zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ:
             header += " read "
         elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_REPORT:
@@ -226,6 +233,16 @@ class Zigbee:
                     print(header, "level for", hex(resp.src.short_addr), level)
                 attr_data = attr_data[attr.get_length():]
 
+    def display_current_devs(self):
+        print('_______________________________')
+        i = 0
+        for item in self.addr_list:
+            if i != self.addr_sel:
+                print('|  ' + str(i) + ': ' + hex(item[0]) + ', ' + hex(item[1]))
+            else:
+                print('|* ' + str(i) + ': ' + hex(item[0]) + ', ' + hex(item[1]))
+            i += 1
+
     def wait_for_addr(self):
         from ...packet import pkt
         print("Waiting for device")
@@ -233,7 +250,7 @@ class Zigbee:
             r,w,x = select.select([self.sf], [], [])
             if len(r) > 0:
                 self.process_packet()
-                if self.mac != None and self.addr != None:
+                if len(self.addr_list) > 0:
                     break
 
 def read_device(tester):
@@ -288,17 +305,20 @@ def test_device(tester):
                     elif line.startswith('unpair'):
                         tester.pair(zigbee.Packet.TYPE_ZB_LEAVE)
                         tester.pair(zigbee.Packet.TYPE_ZB_UNPAIR)
-                        tester.restart()
-                        break
+                        tester.addr_list.remove(tester.addr_list[tester.addr_sel])
+                        tester.addr_sel = 0
                     elif line.startswith('pair'):
                         tester.pair(zigbee.Packet.TYPE_ZB_PAIR)
-                        break
                     elif line.startswith('quit'):
                         print("Restarting test")
                         tester.restart()
-                        break
+                    elif re.compile('^[0-9]+$').search(line) != None:
+                        sel = int(line)
+                        if sel < len(tester.addr_list):
+                            tester.addr_sel = sel
                 elif id(port) == id(tester.sf):
                     tester.process_packet()
+                tester.display_current_devs()
 
 if __name__ == '__main__':
     from ...packet import zigbee
