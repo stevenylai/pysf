@@ -58,8 +58,8 @@ class Zigbee:
                           command, 1, self.ZCL_FRAME_CLIENT_SERVER_DIR,
                           seq, cmd_fmt)
 
-    def simple_level(self, level):
-        self.level(self.COMMAND_LEVEL_MOVE_TO_LEVEL, 1, level, 0)
+    def simple_level(self, level, transtime=0):
+        self.level(self.COMMAND_LEVEL_MOVE_TO_LEVEL, 1, level, transtime)
 
     def simple_send_read(self, cluster_id, attrs):
         self.send_read(self.end_point, cluster_id, attrs, self.ZCL_FRAME_CLIENT_SERVER_DIR, 0)
@@ -278,9 +278,18 @@ def test_device(tester):
                     elif line.startswith('off'):
                         tester.off()
                     elif line.startswith('level'):
-                        m = re.compile(r'level[ \t]+([0-9]+)').search(line)
+                        m = re.compile(r'level[ \t]+([0-9 \t]+)').search(line)
                         if m != None:
-                            tester.simple_level(int(m.group(1)))
+                            i = 0
+                            level = 0
+                            transtime = 0
+                            for mn in re.compile('[0-9]+').finditer(m.group(1)):
+                                if i == 0:
+                                    level = int(mn.group(0))
+                                elif i == 1:
+                                    transtime = int(mn.group(0))
+                                i += 1
+                            tester.simple_level(level, transtime)
                     elif line.startswith('report'):
                         m = re.compile(r'report[ \t]+(.+)').search(line)
                         if m != None:
