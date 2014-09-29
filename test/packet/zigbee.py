@@ -205,6 +205,8 @@ class Zigbee:
             elif zb_packet.type == zb_packet.TYPE_ZB_ATTR_READ or zb_packet.type == zb_packet.TYPE_ZB_ATTR_REPORT:
                 resp = zb_packet.payload.resp
                 self.process_read(resp, zb_packet)
+            else:
+                print(zb_packet.packet)
 
     def process_read(self, resp, zb_packet):
         from ...packet import zigbee_payload
@@ -222,15 +224,15 @@ class Zigbee:
             for i in range(0, resp.num_attr):
                 attr = zigbee_payload.ZigbeeAttr(attr_data)
                 if attr.attr_id == attr.ATTRID_ON_OFF:
-                    on_off = (attr.get_data() & 0xFF)
-                    print(header, "on_off for", hex(resp.src.short_addr), on_off)
+                    self.on_off = (attr.get_data() & 0xFF)
+                    print(header, "on_off for", hex(resp.src.short_addr), self.on_off)
                 attr_data = attr_data[attr.get_length():]
         elif resp.cluster_id == self.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL:
             for i in range(0, resp.num_attr):
                 attr = zigbee_payload.ZigbeeAttr(attr_data)
                 if attr.attr_id == attr.ATTRID_LEVEL_CURRENT_LEVEL:
-                    level = (attr.get_data() & 0xFF)
-                    print(header, "level for", hex(resp.src.short_addr), level)
+                    self.cur_level = (attr.get_data() & 0xFF)
+                    print(header, "level for", hex(resp.src.short_addr), self.cur_level)
                 attr_data = attr_data[attr.get_length():]
 
     def display_current_devs(self):
@@ -290,6 +292,32 @@ def test_device(tester):
                                     transtime = int(mn.group(0))
                                 i += 1
                             tester.simple_level(level, transtime)
+                    elif line.startswith('ld'):
+                        if tester.cur_level > 1:
+                            tester.direction = 0
+                            tester.start_level = tester.cur_level
+                            tester.start_time = time.time()
+                            delta_level = tester.start_level - 1
+                            print('Delta time', int(delta_level / 10))
+                            tester.simple_level(1, int(delta_level / 10))
+                    elif line.startswith('lu'):
+                        if tester.cur_level < 255:
+                            tester.direction = 1
+                            tester.start_level = tester.cur_level
+                            tester.start_time = time.time()
+                            delta_level = 255 - tester.start_level
+                            print('Delta time', int(delta_level / 10))
+                            tester.simple_level(255, int(delta_level / 10))
+                    elif line.startswith('ls'):
+                        cur_time = time.time()
+                        delta_level = int((cur_time - tester.start_time) * 100)
+                        print('Delta level', delta_level)
+                        if tester.direction == 1:
+                            if tester.start_level + delta_level < 255:
+                                tester.simple_level(tester.start_level + delta_level, 0)
+                        else:
+                            if tester.start_level - delta_level > 1:
+                                tester.simple_level(tester.start_level - delta_level, 0)
                     elif line.startswith('report'):
                         m = re.compile(r'report[ \t]+(.+)').search(line)
                         if m != None:
