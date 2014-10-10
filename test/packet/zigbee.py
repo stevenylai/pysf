@@ -361,7 +361,7 @@ if __name__ == '__main__':
     from ...packet import zigbee
     from ...packet import zigbee_payload
     parser = argparse.ArgumentParser(description='Zigbee tester.')
-    parser.add_argument('--hub', metavar='ip:port', type=str, nargs='?',
+    parser.add_argument('hub', metavar='ip:port', type=str, nargs='?',
                         default='127.0.0.1:3000', help='ip:port of the hub running sf')
     parser.add_argument('--key', metavar='bind_secret', type=str, nargs='?',
                         default='', help='bind secret of the hub running sf')
