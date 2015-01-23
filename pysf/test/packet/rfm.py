@@ -28,6 +28,7 @@ class RfmSocket:
             print("Socket status:", hex(packet.payload.status))
 
     def listen(self):
+        from ...packet import pkt
         self.sf.open(self.key)
         while True:
             r,w,x = select.select([self.sf], [], [])
@@ -35,7 +36,8 @@ class RfmSocket:
                 packet = self.sf.readPacket()
                 print("Raw packet:", packet)
                 packet = pkt.Packet(packet)
-                self.print_rfm_socket(packet)
+                if packet.type == packet.TYPE_RFM_PKT:
+                    self.print_rfm_socket(packet.payload)
 
     def write(self, packet):
         print("Writing", packet)
@@ -50,4 +52,3 @@ if __name__ == '__main__':
     args = parser.parse_args()
     tester = RfmSocket(args.hub, bytes(args.key, 'utf-8'))
     tester.listen()
-

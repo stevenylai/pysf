@@ -45,18 +45,18 @@ class Zigbee:
     def on(self):
         self.send_command(self.end_point, self.ZCL_CLUSTER_ID_GEN_ON_OFF,
                           self.COMMAND_ON, 1, self.ZCL_FRAME_CLIENT_SERVER_DIR,
-                          1, b'')
+                          1, 0, b'')
 
     def off(self):
         self.send_command(self.end_point, self.ZCL_CLUSTER_ID_GEN_ON_OFF,
                           self.COMMAND_OFF, 1, self.ZCL_FRAME_CLIENT_SERVER_DIR,
-                          1, b'')
+                          1, 0, b'')
 
     def level(self, command, seq, level, transtime):
         cmd_fmt = bytes([level, transtime & 0xFF, transtime >> 8])
         self.send_command(self.end_point, self.ZCL_CLUSTER_ID_GEN_LEVEL_CONTROL,
                           command, 1, self.ZCL_FRAME_CLIENT_SERVER_DIR,
-                          seq, cmd_fmt)
+                          seq, 0, cmd_fmt)
 
     def simple_level(self, level, transtime=0):
         self.level(self.COMMAND_LEVEL_MOVE_TO_LEVEL, 1, level, transtime)
@@ -71,7 +71,8 @@ class Zigbee:
             buf.append(attr >> 8)
         buf = bytes(buf)
         #print(buf)
-        self.send_command(src_ep, cluster_id, self.ZCL_CMD_READ, 0, dir, seq, buf)
+        self.send_command(src_ep, cluster_id, self.ZCL_CMD_READ, 0, dir,
+                          seq, 1, buf)
 
     def send_config_report_cmd(self, cluster_id, cfg_reports, dir, seq):
         from ...packet import zigbee_payload
@@ -90,7 +91,9 @@ class Zigbee:
             else:
                 cmd_buf.append(config.timeout & 0xFF)
                 cmd_buf.append(config.timeout >> 8 & 0xFF)
-        self.send_command(self.end_point, cluster_id, self.ZCL_CMD_CONFIG_REPORT, 0, dir, seq, bytes(cmd_buf))
+        self.send_command(self.end_point, cluster_id,
+                          self.ZCL_CMD_CONFIG_REPORT, 0, dir, seq,
+                          1, bytes(cmd_buf))
 
     def write_zigbee_payload(self, payload, type):
         from ...packet import zigbee
@@ -107,7 +110,8 @@ class Zigbee:
         print(time.time(), "Writing:", pkt_pkt.packet)
         self.sf.writePacket(pkt_pkt.packet)
 
-    def send_command(self, src_ep, cluster_id, cmd, specific, dir, seq, cmd_fmt):
+    def send_command(self, src_ep, cluster_id, cmd, specific, dir, seq,
+                     disable_default_rsp, cmd_fmt):
         from ...packet import zigbee_payload
         from ...packet import zigbee
         zb_payload = zigbee_payload.Packet(None)
@@ -121,7 +125,7 @@ class Zigbee:
         zb_payload.command.command_id = cmd
         zb_payload.command.specific = specific
         zb_payload.command.direction = dir
-        zb_payload.command.disable_default_rsp = 0
+        zb_payload.command.disable_default_rsp = disable_default_rsp
         zb_payload.command.manu_code = 0
         zb_payload.command.seq = 1
         zb_payload.command.cmd_fmt_len = len(cmd_fmt)
