@@ -6,7 +6,7 @@ from ...protocol import pkt
 class TestRfm(unittest.TestCase):
     '''RFM unit test'''
     def gen_power(self, rssi=None):
-        '''Generate socket power data'''
+        '''Generate socket power packet'''
         packet = pkt.Packet()
         packet.type = packet.TYPE_RFM
         if rssi is None:
@@ -17,7 +17,7 @@ class TestRfm(unittest.TestCase):
         packet.payload_length = 16
         packet.payload.src = 0x181818
         packet.payload.dest = 0x818181
-        packet.payload.payload_length = 8
+        packet.payload.length = 8
         packet.payload.type = packet.payload.TYPE_SOCKET_POWER
         packet.payload.payload.voltage = 1
         packet.payload.payload.current = 2

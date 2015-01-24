@@ -6,14 +6,14 @@ class PacketField:
     '''Packet field descriptor'''
     def __init__(self, length=None, offset=None, name=None):
         self.offset = offset
-        self.length = length
+        self._length = length
         self.name = name
         self.last_field = False
 
     def __get__(self, instance, cls):
         raw_packet = instance.get_raw_packet()
-        if self.length is not None:
-            return raw_packet[self.offset: self.offset + self.length]
+        if self._length is not None:
+            return raw_packet[self.offset: self.offset + self._length]
         else:
             return raw_packet[self.offset:]
 
@@ -32,7 +32,7 @@ class PacketSelector(PacketField):
     def __get__(self, instance, cls):
         pkt_cls = self.get_packet_cls(instance)
         pkt = pkt_cls(parent=instance, offset=self.offset,
-                      length=self.length)
+                      length=self._length)
         pkt.last_field = self.last_field
         return pkt
 
@@ -57,7 +57,7 @@ class Integer2Bytes(PacketField):
 
     def __set__(self, instance, value):
         result = []
-        for i in range(0, self.length):
+        for i in range(0, self._length):
             result.append(bytes([value % 256]))
             value = value >> 8
         super().__set__(instance, b''.join(result))
@@ -88,8 +88,8 @@ class PosInteger(Typed, NonNegative, Integer2Bytes):
 class SizedHex(PosInteger):
     '''Sized hex field'''
     def __set__(self, instance, value):
-        if self.length is not None:
-            max = math.pow(256, self.length)
+        if self._length is not None:
+            max = math.pow(256, self._length)
             if value >= max:
                 raise ValueError("Must be < %s" % max)
         super().__set__(instance, value)

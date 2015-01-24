@@ -34,8 +34,8 @@ class PacketType(type):
                 clsdict[name].offset = cur_offset
             else:
                 cur_offset = clsdict[name].offset
-            if clsdict[name].length is not None:
-                cur_offset += clsdict[name].length
+            if clsdict[name]._length is not None:
+                cur_offset += clsdict[name]._length
             if fields.index(name) == len(fields) - 1:
                 clsdict[name].last_field = True
             else:
@@ -59,7 +59,7 @@ class Packet(metaclass=PacketType):
         self.offset = offset
         if self.offset is None:
             self.offset = 0
-        self.length = length
+        self._length = length
 
     def get_raw_packet(self):
         '''Get the raw packet as byte array'''
@@ -69,10 +69,10 @@ class Packet(metaclass=PacketType):
             raw_packet = self.parent.get_raw_packet()
             if self.offset is None:
                 raise ValueError('Packet offset not initialized')
-            if self.length is None:
+            if self._length is None:
                 return raw_packet[self.offset:]
             else:
-                return raw_packet[self.offset: self.offset + self.length]
+                return raw_packet[self.offset: self.offset + self._length]
 
     def set_raw_packet(self, offset, packet, truncate):
         '''Set the raw packet'''
@@ -88,12 +88,12 @@ class Packet(metaclass=PacketType):
             self.parent.set_raw_packet(self.offset, raw_packet, self.last_field)
 
     def __len__(self):
-        if self.length is not None:
-            return self.length
+        if self._length is not None:
+            return self._length
         else:
             return len(self.get_raw_packet())
 
 
 class BarePayload(Packet):
     '''Bare payload'''
-    payload = PacketField()
+    raw = PacketField()

@@ -27,7 +27,7 @@ class Payload(base.Packet):
     src = fields.SizedHex(length=3)
     type = fields.SizedHex(length=1)
     dest = fields.SizedHex(length=3)
-    payload_length = fields.SizedHex(length=1)
+    length = fields.SizedHex(length=1)
     payload = RfmPayload()
 
     def toggled_type(self):
