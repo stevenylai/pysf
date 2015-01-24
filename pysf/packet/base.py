@@ -3,14 +3,17 @@ from collections import OrderedDict
 from .fields import PacketField
 
 
-def update_packet(dest, offset, source):
+def update_packet(dest, offset, source, truncate):
     '''Update packet dest, with source,
     starting from offset
     '''
     if len(dest) < offset:
         dest = dest + bytes(offset - len(dest)) + source
     else:
-        dest = dest[0: offset] + source
+        temp = dest[0: offset] + source
+        if len(dest) > offset + len(source) and not truncate:
+            temp += dest[offset + len(source):]
+        dest = temp
     return dest
 
 
@@ -33,6 +36,8 @@ class PacketType(type):
                 cur_offset = clsdict[name].offset
             if clsdict[name].length is not None:
                 cur_offset += clsdict[name].length
+            if fields.index(name) == len(fields) - 1:
+                clsdict[name].last_field = True
         clsobj = super().__new__(cls, clsname, bases, dict(clsdict))
         return clsobj
 
@@ -52,6 +57,7 @@ class Packet(metaclass=PacketType):
         else:
             self.offset = 0
         self.length = length
+        self.last_field = False
 
     def get_raw_packet(self):
         '''Get the raw packet as byte array'''
@@ -66,16 +72,18 @@ class Packet(metaclass=PacketType):
             else:
                 return raw_packet[self.offset: self.offset + self.length]
 
-    def set_raw_packet(self, offset, packet):
+    def set_raw_packet(self, offset, packet, truncate):
         '''Set the raw packet'''
         if self.parent is None:
-            self.packet = update_packet(self.packet, offset, packet)
+            self.packet = update_packet(self.packet, offset, packet, truncate)
         else:
             if self.offset is None:
                 raise ValueError('Packet offset not initialized')
             raw_packet = self.get_raw_packet()
-            raw_packet = update_packet(raw_packet, offset, packet)
-            self.parent.set_raw_packet(self.offset, raw_packet)
+            raw_packet = update_packet(
+                raw_packet, offset, packet, self.last_field
+            )
+            self.parent.set_raw_packet(self.offset, raw_packet, self.last_field)
 
     def __len__(self):
         if self.length is not None:
