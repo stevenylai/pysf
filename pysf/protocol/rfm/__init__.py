@@ -2,11 +2,6 @@
 from ..packet import base, fields
 
 
-class BarePayload(base.Packet):
-    '''Bare payload'''
-    payload = fields.PacketField()
-
-
 class RfmPayload(fields.PacketSelector):
     '''RFM payload'''
     @classmethod
@@ -20,7 +15,7 @@ class RfmPayload(fields.PacketSelector):
             from . import socket_status
             return socket_status.Packet
         else:
-            return BarePayload
+            return base.BarePayload
 
 
 class Payload(base.Packet):

@@ -1,5 +1,6 @@
 '''SF packet definitions'''
 from collections import OrderedDict
+from .fields import PacketField
 
 
 def update_packet(dest, offset, source):
@@ -81,3 +82,8 @@ class Packet(metaclass=PacketType):
             return self.length
         else:
             return len(self.get_raw_packet())
+
+
+class BarePayload(Packet):
+    '''Bare payload'''
+    payload = PacketField()
