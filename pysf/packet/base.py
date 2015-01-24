@@ -42,8 +42,9 @@ class Packet(metaclass=PacketType):
         self.parent = parent
         if self.parent is None:
             if data is None:
-                raise ValueError('Data should be present if there is no parent')
-            self.packet = data
+                self.packet = b''
+            else:
+                self.packet = data
             self.offset = offset
             if self.offset is None:
                 self.offset = 0
@@ -58,7 +59,7 @@ class Packet(metaclass=PacketType):
         else:
             raw_packet = self.parent.get_raw_packet()
             if self.offset is None:
-                raise TypeError('Packet not initialized')
+                raise ValueError('Packet offset not initialized')
             if self.length is None:
                 return raw_packet[self.offset:]
             else:
@@ -70,7 +71,7 @@ class Packet(metaclass=PacketType):
             self.packet = update_packet(self.packet, offset, packet)
         else:
             if self.offset is None:
-                raise TypeError('Packet not initialized')
+                raise ValueError('Packet offset not initialized')
             raw_packet = self.get_raw_packet()
             raw_packet = update_packet(raw_packet, offset, packet)
             self.parent.set_raw_packet(self.offset, raw_packet)

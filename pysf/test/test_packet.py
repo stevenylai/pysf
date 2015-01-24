@@ -5,9 +5,9 @@ from ..packet import base, fields
 
 class Packet(base.Packet):
     '''Testing packet'''
-    field1 = fields.Integer(length=2)
-    field2 = fields.Integer(length=4)
-    field3 = fields.Integer(length=1)
+    field1 = fields.SizedHex(length=2)
+    field2 = fields.SizedHex(length=4)
+    field3 = fields.SizedHex(length=1)
 
 
 class TestPacket(unittest.TestCase):

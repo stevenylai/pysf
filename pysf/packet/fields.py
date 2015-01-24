@@ -1,4 +1,5 @@
 '''Packet field module'''
+import math
 
 
 class PacketField:
@@ -21,13 +22,14 @@ class PacketField:
 
 class PacketSelector(PacketField):
     '''Packet selector'''
-    def get_packet_cls(self, parent):
+    @classmethod
+    def get_packet_cls(cls, parent):
         '''Get the packet class'''
         from . import base
         return base.Packet
 
     def __get__(self, instance, cls):
-        pkt_cls = self.get_packet_cls()
+        pkt_cls = self.get_packet_cls(instance)
         pkt = pkt_cls(parent=instance, offset=self.offset,
                       length=self.length)
         return pkt
@@ -40,20 +42,8 @@ class PacketSelector(PacketField):
         super().__set__(instance, raw_packet)
 
 
-class Typed(PacketField):
-    '''Typed packet field'''
-    ty = object
-
-    def __set__(self, instance, value):
-        if not isinstance(value, self.ty):
-            raise TypeError('Expected %s' % self.ty)
-        super().__set__(instance, value)
-
-
-class Integer(Typed):
+class Integer2Bytes(PacketField):
     '''Integer packet field'''
-    ty = int
-
     def __get__(self, instance, cls):
         raw_packet = super().__get__(instance, cls)
         result = 0
@@ -70,10 +60,34 @@ class Integer(Typed):
             val = val >> 8
         super().__set__(instance, b''.join(result))
 
+class Typed(PacketField):
+    '''Typed packet field'''
+    ty = object
+
+    def __set__(self, instance, value):
+        if not isinstance(value, self.ty):
+            raise TypeError('Expected %s' % self.ty)
+        super().__set__(instance, value)
+
 
 class NonNegative(PacketField):
     '''Non-negative packet field'''
     def __set__(self, instance, value):
         if value < 0:
             raise ValueError('Must be >= 0')
+        super().__set__(instance, value)
+
+
+class PosInteger(Typed, NonNegative, Integer2Bytes):
+    '''Positive integer field'''
+    ty = int
+
+
+class SizedHex(PosInteger):
+    '''Sized hex field'''
+    def __set__(self, instance, value):
+        if self.length is not None:
+            max = math.pow(8, self.length)
+            if value > max:
+                raise ValueError("Must be <= %s" % max)
         super().__set__(instance, value)
