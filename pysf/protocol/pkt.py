@@ -4,8 +4,7 @@ from ..packet import base, fields
 
 class PktHeader(fields.PacketSelector):
     '''PKT header'''
-    @classmethod
-    def get_packet_cls(cls, parent):
+    def get_packet_cls(self, parent):
         '''Get header packet class'''
         if parent.type == parent.TYPE_RFM:
             if parent.header_length == 0:
@@ -17,14 +16,13 @@ class PktHeader(fields.PacketSelector):
             return rfm.Header
         else:
             raise TypeError(
-                "Header not defined for type: %s" % parent.type
+                "Header not defined for type: %s" % hex(parent.type)
             )
 
 
 class PktPayload(fields.PacketSelector):
     '''PKT payload'''
-    @classmethod
-    def get_packet_cls(cls, parent):
+    def get_packet_cls(self, parent):
         '''Get payload packet class'''
         self.offset = parent.META_HEADER_LENGTH + \
                       parent.header_length
@@ -36,17 +34,17 @@ class PktPayload(fields.PacketSelector):
             return zigbee.Payload
         else:
             raise TypeError(
-                "Payload not defined for type: %s" % parent.type
+                "Payload not defined for type: %s" % hex(parent.type)
             )
 
 class Packet(base.Packet):
     '''PKT structure'''
-     TYPE_RFM = 0x1
-     TYPE_ZIGBEE = 0x10002
-     META_HEADER_LENGTH = 8
+    TYPE_RFM = 0x1
+    TYPE_ZIGBEE = 0x10002
+    META_HEADER_LENGTH = 8
 
-     type = fields.SizedHex(length=4)
-     header_length = fields.SizedHex(length=2)
-     payload_length = fields.SizedHex(length=2)
-     header = PktHeader()
-     payload = PktPayload()
+    type = fields.SizedHex(length=4)
+    header_length = fields.SizedHex(length=2)
+    payload_length = fields.SizedHex(length=2)
+    header = PktHeader()
+    payload = PktPayload()

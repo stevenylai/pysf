@@ -38,6 +38,8 @@ class PacketType(type):
                 cur_offset += clsdict[name].length
             if fields.index(name) == len(fields) - 1:
                 clsdict[name].last_field = True
+            else:
+                clsdict[name].last_field = False
         clsobj = super().__new__(cls, clsname, bases, dict(clsdict))
         return clsobj
 
@@ -51,13 +53,13 @@ class Packet(metaclass=PacketType):
                 self.packet = b''
             else:
                 self.packet = data
-            self.offset = offset
-            if self.offset is None:
-                self.offset = 0
+            self.last_field = True
         else:
+            self.last_field = False
+        self.offset = offset
+        if self.offset is None:
             self.offset = 0
         self.length = length
-        self.last_field = False
 
     def get_raw_packet(self):
         '''Get the raw packet as byte array'''
@@ -81,7 +83,7 @@ class Packet(metaclass=PacketType):
                 raise ValueError('Packet offset not initialized')
             raw_packet = self.get_raw_packet()
             raw_packet = update_packet(
-                raw_packet, offset, packet, self.last_field
+                raw_packet, offset, packet, truncate
             )
             self.parent.set_raw_packet(self.offset, raw_packet, self.last_field)
 

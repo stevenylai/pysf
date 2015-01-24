@@ -18,13 +18,13 @@ class PacketField:
             return raw_packet[self.offset:]
 
     def __set__(self, instance, value):
-        instance.set_raw_packet(self.offset, value, self.last_field)
+        instance.set_raw_packet(self.offset, value,
+                                (self.last_field and instance.last_field))
 
 
 class PacketSelector(PacketField):
     '''Packet selector'''
-    @classmethod
-    def get_packet_cls(cls, parent):
+    def get_packet_cls(self, parent):
         '''Get the packet class'''
         from . import base
         return base.Packet
@@ -89,7 +89,7 @@ class SizedHex(PosInteger):
     '''Sized hex field'''
     def __set__(self, instance, value):
         if self.length is not None:
-            max = math.pow(8, self.length + 1)
-            if value > max:
-                raise ValueError("Must be <= %s" % max)
+            max = math.pow(256, self.length)
+            if value >= max:
+                raise ValueError("Must be < %s" % max)
         super().__set__(instance, value)
