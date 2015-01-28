@@ -6,7 +6,7 @@ from . import AddressField
 class ZCLDataItem(fields.Integer2Bytes):
     '''ZCL data item'''
     def __set__(self, instance, value):
-        self._length = instance.get_length() - 4
+        self._length = len(instance) - 4
         super().__set__(instance, value)
 
     def get_raw_packet(self, instance, cls):
@@ -84,7 +84,7 @@ class ZCLData(base.Packet):
     data_type = fields.SizedHex(length=1)
     data = ZCLDataItem()
 
-    def get_length(self):
+    def __len__(self):
         '''Get total length'''
         total_len = 4
         if self.data_type in {
@@ -141,43 +141,11 @@ class ZCLData(base.Packet):
         return total_len
 
 
-class ZCLDataField(fields.PacketSelector):
+class ZCLDataField(fields.PacketListSelector):
     '''ZCL data selector'''
     def get_packet_cls(self, parent):
         '''Get packet class'''
         return ZCLData
-
-    def __get__(self, instance, cls):
-        '''Get attribute data.
-        This one will return as list of ZCLData
-        '''
-        parent = instance
-        raw_packet = parent.get_raw_packet()
-        raw_packet = raw_packet[self.offset:]
-        packets = []
-        self._length = 0
-        sub_offset = 0
-        for i in range(0, parent.num_attr):
-            pkt = ZCLData(parent=parent,
-                          offset=sub_offset + self.offset)
-            if i == parent.num_attr - 1:
-                pkt.last_field = self.last_field
-            self._length += pkt.get_length()
-            packets.append(pkt)
-        return packets
-
-    def __set__(self, instance, value):
-        '''Set ZCL data list.
-        The input here must be a list of ZCLData
-        '''
-        if not isinstance(value, list):
-            raise ValueError('Must set with a list of packets')
-        raw_packet_list = []
-        self._length = 0
-        for pkt in value:
-            raw_packet_list.append(pkt.get_raw_packet())
-            self._length += pkt.get_length()
-        super().__set__(instance, b''.join(raw_packet_list))
 
 
 class Packet(base.Packet):

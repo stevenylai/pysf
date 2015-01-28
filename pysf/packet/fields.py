@@ -47,6 +47,36 @@ class PacketSelector(PacketField):
             raise ValueError('Must use a packet/byte array to set to selector')
 
 
+class PacketListSelector(PacketSelector):
+    '''Packet list selector will get a list of packets instead of just one'''
+    def __get__(self, instance, cls):
+        pkt_cls = self.get_packet_cls(instance)
+        parent = instance
+        raw_packet = parent.get_raw_packet()
+        raw_packet = raw_packet[self.offset:]
+        packets = []
+        self._length = 0
+        sub_offset = 0
+        for i in range(0, parent.num_attr):
+            pkt = pkt_cls(parent=parent,
+                          offset=sub_offset + self.offset)
+            if i == parent.num_attr - 1:
+                pkt.last_field = self.last_field
+            self._length += len(pkt)
+            packets.append(pkt)
+        return packets
+
+    def __set__(self, instance, value):
+        if not isinstance(value, list):
+            raise ValueError('Must set with a list of packets')
+        raw_packet_list = []
+        self._length = 0
+        for pkt in value:
+            raw_packet_list.append(pkt.get_raw_packet())
+            self._length += len(pkt)
+        super().__set__(instance, b''.join(raw_packet_list))
+
+
 class Integer2Bytes(PacketField):
     '''Integer packet field'''
     def get_raw_packet(self, instance, cls):
