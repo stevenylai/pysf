@@ -38,16 +38,23 @@ class PacketSelector(PacketField):
 
     def __set__(self, instance, value):
         from . import base
-        if not isinstance(value, base.Packet):
-            raise ValueError('Must use a packet to set to selector')
-        raw_packet = value.get_raw_packet()
-        super().__set__(instance, raw_packet)
+        if isinstance(value, base.Packet):
+            raw_packet = value.get_raw_packet()
+            super().__set__(instance, raw_packet)
+        elif isinstance(value, bytes):
+            super().__set__(instance, value)
+        else:
+            raise ValueError('Must use a packet/byte array to set to selector')
 
 
 class Integer2Bytes(PacketField):
     '''Integer packet field'''
+    def get_raw_packet(self, instance, cls):
+        '''Get raw packet'''
+        return super().__get__(instance, cls)
+
     def __get__(self, instance, cls):
-        raw_packet = super().__get__(instance, cls)
+        raw_packet = self.get_raw_packet(instance, cls)
         result = 0
         shift = 0
         for item in raw_packet:

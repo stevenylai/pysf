@@ -43,6 +43,11 @@ class Payload(base.Packet):
     status = fields.SizedHex(length=1)
     payload = ZigbeePayload()
 
+    def set_length(self):
+        '''Set the packet lengths'''
+        self.length = len(self.payload) + 1
+        self.parent.payload_length = len(self)
+
 
 class Address(base.Packet):
     '''Zigbee adress'''
