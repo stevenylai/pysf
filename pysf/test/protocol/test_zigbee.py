@@ -116,6 +116,7 @@ class TestZigbee(unittest.TestCase):
 
     def test_command(self):
         '''Test ZCL command packet'''
+        from ...protocol.zigbee import Address
         # Level control
         cmd1 = self.gen_zcl_command(200, 1)
         cmd2 = self.gen_zcl_command(12, 2)
@@ -124,6 +125,20 @@ class TestZigbee(unittest.TestCase):
                          b'\x05\x00\x1b\x00\x00'
                          b'\x01'
                          b'4\x12\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00'
+                         b'\x08\x00\x01\x00\x00\x01\x00\x00\x01\x03'
+                         b'\xc8\x0c\x00',
+                         packet.get_raw_packet())
+        # Change just address
+        addr = Address()
+        addr.short_addr = 0x4567
+        addr.mode = addr.ADDR_16BIT
+        addr.end_point = 1
+        addr.pan_id = 0
+        packet.payload.payload.dest = addr
+        self.assertEqual(b'\x02\x00\x01\x00\x00\x00\x1f\x00'
+                         b'\x05\x00\x1b\x00\x00'
+                         b'\x01'
+                         b'gE\x00\x00\x00\x00\x00\x00\x02\x01\x00\x00'
                          b'\x08\x00\x01\x00\x00\x01\x00\x00\x01\x03'
                          b'\xc8\x0c\x00',
                          packet.get_raw_packet())

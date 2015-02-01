@@ -41,6 +41,9 @@ class ZCLCommandField(fields.PacketListSelector):
 
 class Packet(base.Packet):
     '''ZCL command packet'''
+    ZCL_FRAME_CLIENT_SERVER_DIR = 0x00
+    ZCL_FRAME_SERVER_CLIENT_DIR = 0x01
+
     src_ep = fields.SizedHex(length=1)
     dest = AddressField()
     cluster_id = fields.SizedHex(length=2)
