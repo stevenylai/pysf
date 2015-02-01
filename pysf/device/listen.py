@@ -15,8 +15,8 @@ class Listener:
         print(packet_string)
 
     @asyncio.coroutine
-    def dump_packets(self):
-        '''Dump all packets from the device'''
+    def process_packets(self):
+        '''Process all packets from the device'''
         while True:
             packet = yield from self.device.read()
             self.emit(self.device.packet_string(packet))
@@ -31,7 +31,7 @@ class Listener:
         '''Listen to the device'''
         self.create_device()
         self.device.open()
-        self.event_loop.run_until_complete(self.dump_packets())
+        self.event_loop.run_until_complete(self.process_packets())
 
 if __name__ == '__main__':
     from . import base

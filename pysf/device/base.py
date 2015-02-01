@@ -8,7 +8,6 @@ class Device:
     '''Base device abstraction using asyncio'''
     def __init__(self, event_loop, bindable='127.0.0.1:3000', key=b''):
         '''Device creation'''
-        from ..core.SFSource import SFSource
         self.event_loop = event_loop
         self.bindable = bindable
         self.sf = None
