@@ -49,7 +49,12 @@ class Device(base.Device):
                          direction, manu_code, seq, disable_default_rsp,
                          cmd_list)
 
-    def zcl_read_attribute(self, src_ep, cluster_id, attributes, direction,
-                           seq):
+    def zcl_read_attribute(self, attributes, addr, src_ep, cluster_id,
+                           direction, manu_code, seq, disable_default_rsp):
         '''ZCL read attribute'''
-        pass
+        cmd_list = []
+        for item in attributes:
+            cmd_list.extend(item.get_commands())
+        self.zcl_command(addr, src_ep, cluster_id, ZCL_CMD_READ, 0,
+                         direction, manu_code, seq, disable_default_rsp,
+                         cmd_list)
