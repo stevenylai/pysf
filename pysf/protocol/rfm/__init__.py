@@ -2,6 +2,11 @@
 from ...packet import base, fields
 
 
+def toggled_type(rfm_type):
+    '''Toggle rfm type'''
+    return rfm_type ^ 0x80
+
+
 class RfmPayload(fields.PacketSelector):
     '''RFM payload'''
     def get_packet_cls(self, parent):
@@ -10,7 +15,7 @@ class RfmPayload(fields.PacketSelector):
             from . import socket_power
             return socket_power.Packet
         elif parent.type == parent.TYPE_SOCKET_STATUS or \
-        parent.toggled_type() == parent.TYPE_SOCKET_STATUS:
+        toggled_type(parent.type) == parent.TYPE_SOCKET_STATUS:
             from . import socket_status
             return socket_status.Packet
         else:
@@ -29,10 +34,6 @@ class Payload(base.Packet):
     dest = fields.SizedHex(length=3)
     length = fields.SizedHex(length=1)
     payload = RfmPayload()
-
-    def toggled_type(self):
-        '''Toggle type field'''
-        return self.type ^ 0x80
 
 
 class Header(base.Packet):

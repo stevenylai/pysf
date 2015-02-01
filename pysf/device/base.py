@@ -74,3 +74,7 @@ class Device:
         read_future = asyncio.Future()
         self.readers.append(read_future)
         return read_future
+
+    def packet_string(self, packet):
+        '''Packet string'''
+        return packet
