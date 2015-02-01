@@ -45,4 +45,5 @@ class Device(Base):
 
 if __name__ == '__main__':
     from ... import listen
-    listen.listen(Device)
+    listener = listen.Listener(Device)
+    listener.listen()
