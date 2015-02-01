@@ -10,7 +10,8 @@ class Device:
         '''Device creation'''
         from ..core.SFSource import SFSource
         self.event_loop = event_loop
-        self.sf = SFSource(None, bindable)
+        self.bindable = bindable
+        self.sf = None
         self.key = key
         self.arg_parser = argparse.ArgumentParser()
         self.readers = []
@@ -32,7 +33,8 @@ class Device:
         from ..core.SFSource import SFSource
         args = self.arg_parser.parse_args()
         if args.bindable is not None:
-            self.sf = SFSource(None, args.bindable)
+            self.bindable = args.bindable
+        self.sf = SFSource(None, self.bindable)
         if args.key is not None:
             self.key = bytes(args.key, 'utf-8')
         return args

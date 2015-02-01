@@ -1,6 +1,7 @@
 '''Listen to RFM sockets'''
 import asyncio
 from . import Device as Base
+from ....protocol import rfm
 
 
 class Device(Base):
@@ -8,7 +9,7 @@ class Device(Base):
     def __init__(self, event_loop, bindable='127.0.0.1:3000', key=b''):
         '''Create socket listener'''
         super().__init__(event_loop, bindable, key)
-        self.listened = 0x181818
+        self.listened = rfm.Payload.ADDR_RFM_BCAST
 
     def cmdline_parser(self):
         '''Get command parser for socket listener'''
@@ -37,8 +38,10 @@ class Device(Base):
         else:
             from .. import addr_match
             rfm_packet = packet.payload
-            if addr_match(rfm_packet.src, self.listened) \
-               or addr_match(rfm_packet.dest, self.listened):
+            if self.listened == rfm.Payload.ADDR_RFM_BCAST:
+                return packet
+            elif rfm_packet.src == self.listened \
+               or rfm_packet.dest == self.listened:
                 return packet
             else:
                 return None

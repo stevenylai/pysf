@@ -21,11 +21,15 @@ class Listener:
             packet = yield from self.device.read()
             self.emit(self.device.packet_string(packet))
 
-    def listen(self):
-        '''Listen to the device'''
+    def create_device(self):
+        '''Create device for listening'''
         self.device = self.device_cls(self.event_loop)
         self.device.cmdline_parser()
         self.device.cmdline_parsed()
+
+    def listen(self):
+        '''Listen to the device'''
+        self.create_device()
         self.device.open()
         self.event_loop.run_until_complete(self.dump_packets())
 
