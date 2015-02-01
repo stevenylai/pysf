@@ -13,6 +13,7 @@ class Device:
         self.sf = SFSource(None, bindable)
         self.key = key
         self.arg_parser = argparse.ArgumentParser()
+        self.readers = []
 
     def cmdline_parser(self):
         '''Get the command line parser'''
@@ -36,30 +37,40 @@ class Device:
             self.key = bytes(args.key, 'utf-8')
         return args
 
-    def read_sf_packet(self):
+    def filter_packet(self, packet):
+        '''Filter packet. This method can be overridden
+        to return packets which are not raw or to return
+        None for packets which are not of interest
+        '''
+        return packet
+
+    def _read_sf_packet(self):
         '''Read SF packet'''
-        packet_raw = self.sf.readPacket()
-        print(packet_raw)
+        packet = self.sf.readPacket()
+        packet = self.filter_packet(packet)
+        if packet is not None:
+            for future in self.readers:
+                future.set_result(packet)
+            self.readers.clear()
 
     def open(self):
         '''Open the device'''
         self.sf.open(self.key)
-        self.event_loop.add_reader(self.sf.fileno(), self.read_sf_packet)
+        self.event_loop.add_reader(self.sf.fileno(), self._read_sf_packet)
 
     def close(self):
         '''Close the device'''
         self.sf.close()
+        for future in self.readers:
+            future.set_exception(EOFError('Connection closed'))
+        self.readers.clear()
 
     def write(self, packet):
-        pass
+        '''Write a packet to device'''
+        self.sf.writePacket(packet)
 
     def read(self):
-        pass
-
-if __name__ == '__main__':
-    event_loop = asyncio.get_event_loop()
-    device = Device(event_loop)
-    args_parser = device.cmdline_parser()
-    device.cmdline_parsed()
-    device.open()
-    event_loop.run_forever()
+        '''Read from device'''
+        read_future = asyncio.Future()
+        self.readers.append(read_future)
+        return read_future
