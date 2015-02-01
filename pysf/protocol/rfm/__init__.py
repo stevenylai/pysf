@@ -37,4 +37,6 @@ class Payload(base.Packet):
 
 class Header(base.Packet):
     '''RFM header'''
-    rssi = fields.SizedHex(length=2)
+    RFM_HEADER_RSSI = 0
+    type = fields.SizedHex(length=1)
+    rssi = fields.SizedHex(length=1)
