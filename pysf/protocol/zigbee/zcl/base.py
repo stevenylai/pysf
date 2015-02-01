@@ -214,3 +214,21 @@ class ZCL:
         elif self.data_type == self.ZCL_DATATYPE_128_BIT_SEC_KEY:
             buf_list.append(data[0: 16])
         return buf_list
+
+
+class CommandGen:
+    '''Command generator base class'''
+    def one_byte(self, value):
+        '''One byte command'''
+        from .. import command
+        cmd = command.OneByteCommand()
+        cmd.one_byte = value
+        return cmd
+
+    def two_byte(self, value):
+        '''Two byte command'''
+        from .. import command
+        cmd = command.TwoByteCommand()
+        cmd.low_byte = value & 0xFF
+        cmd.high_byte = value >> 8 & 0xFF
+        return cmd

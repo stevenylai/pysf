@@ -39,10 +39,15 @@ class Device(base.Device):
         packet.payload.payload.cmd_fmt = cmd_list
         self.send_packet(packet)
 
-    def zcl_config_report(self, cluster_id, cfg_reports, direction, seq):
+    def zcl_config_report(self, cfg_reports, addr, src_ep, cluster_id,
+                          direction, manu_code, seq, disable_default_rsp):
         '''ZCL configure report'''
-        cmd_buf = []
-        pass
+        cmd_list = []
+        for report in cfg_reports:
+            cmd_list.extend(report.get_commands())
+        self.zcl_command(addr, src_ep, cluster_id, ZCL_CMD_CONFIG_REPORT, 0,
+                         direction, manu_code, seq, disable_default_rsp,
+                         cmd_list)
 
     def zcl_read_attribute(self, src_ep, cluster_id, attributes, direction,
                            seq):
