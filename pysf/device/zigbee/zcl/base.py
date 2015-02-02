@@ -12,17 +12,6 @@ class Device(ZigbeeDevice):
     ZCL_CMD_READ = 0x00
     ZCL_CMD_CONFIG_REPORT = 0x06
 
-    def __init__(self, event_loop, bindable='127.0.0.1:3000', key=b''):
-        '''Create the device and set an empty command item.
-        In case of command length is 0,
-        we still need to fill in an empty command
-        '''
-        super().__init__(event_loop, bindable, key)
-        from ....protocol.zigbee import command
-        cmd = command.ZCLCommand()
-        cmd.one_byte = 0x0
-        self.empty_command = [cmd]
-
     def do_bind(self, bind_type, mac, addr, end_point, cluster_id):
         '''Bind/unbind'''
         packet = self.gen_packet()
@@ -52,8 +41,6 @@ class Device(ZigbeeDevice):
         for cmd in cmd_list:
             total_len += len(cmd)
         packet.payload.payload.cmd_fmt_len = total_len
-        if total_len == 0:
-            cmd_list = self.empty_command
         packet.payload.payload.cmd_fmt = cmd_list
         self.send_packet(packet)
 

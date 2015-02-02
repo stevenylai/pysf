@@ -53,5 +53,5 @@ class Packet(base.Packet):
     disable_default_rsp = fields.SizedHex(length=1)
     manu_code = fields.SizedHex(length=2)
     seq = fields.SizedHex(length=1)
-    cmd_fmt_len = fields.SizedHex(length=1)
+    cmd_fmt_len = fields.SizedHex(length=2)
     cmd_fmt = ZCLCommandField()

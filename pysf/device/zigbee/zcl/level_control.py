@@ -17,9 +17,9 @@ class Device(base.Device):
                       level, transtime=0):
         '''Change level command'''
         from ....protocol.zigbee import command
-        level_cmd = command.OneByteCommand()
+        level_cmd = command.ZCLCommand()
         level_cmd.one_byte = level
-        transtime_cmd = command.TwoByteCommand()
+        transtime_cmd = command.ZCLCommand()
         transtime_cmd.low_byte = transtime & 0xFF
         transtime_cmd.high_byte = transtime >> 8 & 0xFF
         self.zcl_command(addr, src_ep, CLUSTER_ID, self.COMMAND_OFF, 1,
