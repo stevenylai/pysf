@@ -12,9 +12,9 @@ class Control(base.Control):
         '''
         try:
             return importlib.import_module(
-                cluster, self.parent_pkg_name
+                '.' + cluster, self.parent_pkg_name
             )
-        except ImportError:
+        except ImportError as exc:
             return None
 
     @property
@@ -32,6 +32,7 @@ class Control(base.Control):
     def bind(self, cluster):
         '''Bind'''
         cluster_pkg = self.cluster_module_from_name(cluster)
+        print("Cluster to bind:", cluster, cluster_pkg)
         if cluster_pkg is None:
             return
         from ....protocol.zigbee import bind
@@ -39,7 +40,7 @@ class Control(base.Control):
             bind.Packet.TYPE_BIND_BIND,
             self.current_device['mac'],
             self.current_device['addr'],
-            self.device.end_point, cluster_pkg.CLUSTR_ID
+            self.device.end_point, cluster_pkg.CLUSTER_ID
         )
 
     @device_selected
@@ -55,8 +56,8 @@ class Control(base.Control):
         ]
         reader = read.Read(attr_id_list)
         self.device.zcl_read_attribute(
-            reader, self.current_addr, self.device.end_point,
-            cluster_pkt.CLUSTR_ID,
+            [reader], self.current_addr, self.device.end_point,
+            cluster_pkg.CLUSTER_ID,
             command.Packet.ZCL_FRAME_CLIENT_SERVER_DIR, 0, 0, 1
         )
 

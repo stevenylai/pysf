@@ -11,11 +11,17 @@ class ZCLDataItem(fields.Integer2Bytes):
 
     def get_raw_packet(self, instance, cls):
         '''Get raw packet'''
-        raw_packet = super().__get__(instance, cls)
+        raw_packet = instance.get_raw_packet()
         return raw_packet[
-            self.offset: self.offset + instance.get_length()
+            self.offset: self.offset + len(instance)
         ]
 
+    def __get__(self, instance, cls):
+        '''Return the raw bytes because the actual value
+        will depend on the data_type field in the parent
+        packet
+        '''
+        return self.get_raw_packet(instance, cls)
 
 class ZCLData(base.Packet):
     '''Individual ZCL data packet'''

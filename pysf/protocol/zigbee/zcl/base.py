@@ -265,14 +265,14 @@ class CommandGen:
     def one_byte(self, value):
         '''One byte command'''
         from .. import command
-        cmd = command.OneByteCommand()
+        cmd = command.ZCLCommand()
         cmd.one_byte = value
         return cmd
 
     def two_byte(self, value):
         '''Two byte command'''
         from .. import command
-        cmd = command.TwoByteCommand()
+        cmd = command.ZCLCommand()
         cmd.low_byte = value & 0xFF
         cmd.high_byte = value >> 8 & 0xFF
         return cmd

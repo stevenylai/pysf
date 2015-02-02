@@ -50,8 +50,8 @@ class Device(ZigbeeDevice):
         cmd_list = []
         for report in cfg_reports:
             cmd_list.extend(report.get_commands())
-        self.zcl_command(addr, src_ep, cluster_id, ZCL_CMD_CONFIG_REPORT, 0,
-                         direction, manu_code, seq, disable_default_rsp,
+        self.zcl_command(addr, src_ep, cluster_id, self.ZCL_CMD_CONFIG_REPORT,
+                         0, direction, manu_code, seq, disable_default_rsp,
                          cmd_list)
 
     def zcl_read_attribute(self, attributes, addr, src_ep, cluster_id,
@@ -60,7 +60,7 @@ class Device(ZigbeeDevice):
         cmd_list = []
         for item in attributes:
             cmd_list.extend(item.get_commands())
-        self.zcl_command(addr, src_ep, cluster_id, ZCL_CMD_READ, 0,
+        self.zcl_command(addr, src_ep, cluster_id, self.ZCL_CMD_READ, 0,
                          direction, manu_code, seq, disable_default_rsp,
                          cmd_list)
 
@@ -72,7 +72,8 @@ class Device(ZigbeeDevice):
         The function will return the processed
         data in JSON format
         '''
-        from ...protocol.zigbee.zcl import ZCL
+        from ....protocol.zigbee.zcl import ZCL
+        from .. import get_cluster_module
         attr_pkt = zigbee_packet.payload
         zcl = get_cluster_module(attr_pkt.cluster_id)
         if zcl is None:  # Unknown cluster

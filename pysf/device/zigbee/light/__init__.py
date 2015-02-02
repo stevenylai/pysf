@@ -1,4 +1,5 @@
 '''Zigbee light device'''
+import time
 from ..zcl import on_off, level_control
 
 
@@ -8,8 +9,9 @@ class Device(on_off.Device, level_control.Device):
 
     def attribute_read(self, is_read, attribute):
         '''Print it out'''
+        current = time.time()
         if is_read:
-            print('read', attribute)
+            print(int(current), 'read', attribute)
         else:
-            print('report', attribute)
+            print(int(current), 'report', attribute)
         return True
