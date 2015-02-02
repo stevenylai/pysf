@@ -1,0 +1,1 @@
+'''Panel class for HCI'''
