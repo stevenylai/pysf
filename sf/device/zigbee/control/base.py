@@ -34,7 +34,7 @@ class Control(listen.Listener):
                 print('|*', i, hex(self.device_list[i]['mac']),
                       hex(self.device_list[i]['addr']))
 
-    def add_zigbee(self, new_dev):
+    def add_zigbee(self, new_dev, addr_info):
         '''Add a new Zigbee device to the device list'''
         if new_dev['mac'] not in [dev['mac'] for dev in self.device_list]:
             self.device_list.append(new_dev)
@@ -58,7 +58,7 @@ class Control(listen.Listener):
                     'mac': zigbee_packet.payload.mac,
                     'addr': zigbee_packet.payload.addr,
                 }
-                self.add_zigbee(new_dev)
+                self.add_zigbee(new_dev, zigbee_packet.payload)
             self.process_zigbee_packet(zigbee_packet)
 
     @property
