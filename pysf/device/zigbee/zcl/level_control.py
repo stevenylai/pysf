@@ -2,7 +2,10 @@
 from . import base
 CLUSTER_ID = 0x0008
 ATTRIBUTES = {
-    'ATTRID_LEVEL_CURRENT_LEVEL': 0x0000
+    'current_level': {
+        'name': 'ATTRID_LEVEL_CURRENT_LEVEL',
+        'id': 0x0000,
+    },
 }
 
 

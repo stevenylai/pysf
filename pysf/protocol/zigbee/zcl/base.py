@@ -1,4 +1,5 @@
 '''ZCL base functions'''
+import datetime
 
 
 class ZCL:
@@ -149,6 +150,49 @@ class ZCL:
             return True
         else:
             return False
+
+    def to_python(self, data):
+        from ....packet import fields
+        if self.data_type in {
+            self.ZCL_DATATYPE_DATA8,
+            self.ZCL_DATATYPE_BITMAP8,
+            self.ZCL_DATATYPE_INT8,
+            self.ZCL_DATATYPE_UINT8,
+            self.ZCL_DATATYPE_ENUM8,
+            self.ZCL_DATATYPE_DATA16,
+            self.ZCL_DATATYPE_BITMAP16,
+            self.ZCL_DATATYPE_UINT16,
+            self.ZCL_DATATYPE_INT16,
+            self.ZCL_DATATYPE_ENUM16,
+            self.ZCL_DATATYPE_CLUSTER_ID,
+            self.ZCL_DATATYPE_ATTR_ID,
+            self.ZCL_DATATYPE_DATA24,
+            self.ZCL_DATATYPE_BITMAP24,
+            self.ZCL_DATATYPE_UINT24,
+            self.ZCL_DATATYPE_INT24,
+            self.ZCL_DATATYPE_DATA32,
+            self.ZCL_DATATYPE_BITMAP32,
+            self.ZCL_DATATYPE_UINT32,
+            self.ZCL_DATATYPE_INT32,
+            self.data_type == self.ZCL_DATATYPE_UINT40,
+            self.data_type == self.ZCL_DATATYPE_UINT48,
+                self.data_type == self.ZCL_DATATYPE_IEEE_ADDR,
+        }:
+            real_data = data[0: 0 + self.get_length()]
+            return fields.byte_to_int(real_data)
+        if self.data_type in {
+            self.ZCL_DATATYPE_DATE,
+            self.ZCL_DATATYPE_UTC,
+        }:
+            real_data = data[0: 0 + self.get_length()]
+            date_value = fields.byte_to_int(real_data)
+            return datetime.datetime.fromtimestamp(date_value / 1e3)
+        if self.data_type == self.ZCL_DATATYPE_BOOLEAN:
+            if data[0] == 0:
+                return False
+            else:
+                return True
+        raise NotImplemented()
 
     def serialize(self, data, buf_list):
         '''Serialize the data according in the data

@@ -2,6 +2,16 @@
 import math
 
 
+def byte_to_int(data):
+    '''Convert a byte array of data to an integer'''
+    result = 0
+    shift = 0
+    for item in data:
+        result += (item << shift)
+        shift += 8
+    return result
+
+
 class PacketField:
     '''Packet field descriptor'''
     def __init__(self, length=None, offset=None, name=None):
@@ -85,12 +95,7 @@ class Integer2Bytes(PacketField):
 
     def __get__(self, instance, cls):
         raw_packet = self.get_raw_packet(instance, cls)
-        result = 0
-        shift = 0
-        for item in raw_packet:
-            result += (item << shift)
-            shift += 8
-        return result
+        return byte_to_int(raw_packet)
 
     def __set__(self, instance, value):
         result = []

@@ -2,7 +2,10 @@
 from . import base
 CLUSTER_ID = 0x0006
 ATTRIBUTES = {
-    'ATTRID_ON_OFF': 0x0000
+    'on_off': {
+        'name': 'ATTRID_ON_OFF',
+        'id': 0x0000,
+    },
 }
 
 
