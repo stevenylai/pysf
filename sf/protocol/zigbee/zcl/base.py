@@ -73,49 +73,49 @@ class ZCL:
             self.ZCL_DATATYPE_UINT8, self.ZCL_DATATYPE_ENUM8
         }:
             return 1
-        elif self.data_type in {
-        self.ZCL_DATATYPE_DATA16, self.ZCL_DATATYPE_BITMAP16,
-        self.ZCL_DATATYPE_UINT16, self.ZCL_DATATYPE_INT16,
-        self.ZCL_DATATYPE_ENUM16, self.ZCL_DATATYPE_SEMI_PREC,
-        self.ZCL_DATATYPE_CLUSTER_ID, self.ZCL_DATATYPE_ATTR_ID
+        if self.data_type in {
+            self.ZCL_DATATYPE_DATA16, self.ZCL_DATATYPE_BITMAP16,
+            self.ZCL_DATATYPE_UINT16, self.ZCL_DATATYPE_INT16,
+            self.ZCL_DATATYPE_ENUM16, self.ZCL_DATATYPE_SEMI_PREC,
+            self.ZCL_DATATYPE_CLUSTER_ID, self.ZCL_DATATYPE_ATTR_ID
         }:
             return 2
-        elif self.data_type in {
-        self.ZCL_DATATYPE_DATA24, self.ZCL_DATATYPE_BITMAP24,
-        self.ZCL_DATATYPE_UINT24, self.ZCL_DATATYPE_INT24
+        if self.data_type in {
+            self.ZCL_DATATYPE_DATA24, self.ZCL_DATATYPE_BITMAP24,
+            self.ZCL_DATATYPE_UINT24, self.ZCL_DATATYPE_INT24
         }:
             return 3
-        elif self.data_type in {
-        self.ZCL_DATATYPE_DATA32, self.ZCL_DATATYPE_BITMAP32,
-        self.ZCL_DATATYPE_UINT32, self.ZCL_DATATYPE_INT32,
-        self.ZCL_DATATYPE_SINGLE_PREC, self.ZCL_DATATYPE_TOD,
-        self.ZCL_DATATYPE_DATE, self.ZCL_DATATYPE_UTC,
-        self.ZCL_DATATYPE_BAC_OID
+        if self.data_type in {
+            self.ZCL_DATATYPE_DATA32, self.ZCL_DATATYPE_BITMAP32,
+            self.ZCL_DATATYPE_UINT32, self.ZCL_DATATYPE_INT32,
+            self.ZCL_DATATYPE_SINGLE_PREC, self.ZCL_DATATYPE_TOD,
+            self.ZCL_DATATYPE_DATE, self.ZCL_DATATYPE_UTC,
+            self.ZCL_DATATYPE_BAC_OID
         }:
             return 4
-        elif self.data_type in {
-        self.ZCL_DATATYPE_UINT40, self.ZCL_DATATYPE_INT40
+        if self.data_type in {
+            self.ZCL_DATATYPE_UINT40, self.ZCL_DATATYPE_INT40
         }:
             return 5
-        elif self.data_type in {
-        self.ZCL_DATATYPE_UINT48, self.ZCL_DATATYPE_INT48
+        if self.data_type in {
+            self.ZCL_DATATYPE_UINT48, self.ZCL_DATATYPE_INT48
         }:
             return 6
-        elif self.data_type in {
-        self.ZCL_DATATYPE_UINT56, self.ZCL_DATATYPE_INT56
+        if self.data_type in {
+            self.ZCL_DATATYPE_UINT56, self.ZCL_DATATYPE_INT56
         }:
             return 7
-        elif self.data_type in {
-        self.ZCL_DATATYPE_DOUBLE_PREC, self.ZCL_DATATYPE_IEEE_ADDR,
-        self.ZCL_DATATYPE_UINT64, self.ZCL_DATATYPE_INT64
+        if self.data_type in {
+            self.ZCL_DATATYPE_DOUBLE_PREC, self.ZCL_DATATYPE_IEEE_ADDR,
+            self.ZCL_DATATYPE_UINT64, self.ZCL_DATATYPE_INT64
         }:
             return 8
-        elif self.data_type in {
-        self.ZCL_DATATYPE_128_BIT_SEC_KEY
+        if self.data_type in {
+            self.ZCL_DATATYPE_128_BIT_SEC_KEY
         }:
             return 16
-        elif self.data_type in {
-        self.ZCL_DATATYPE_NO_DATA, self.ZCL_DATATYPE_UNKNOWN
+        if self.data_type in {
+            self.ZCL_DATATYPE_NO_DATA, self.ZCL_DATATYPE_UNKNOWN
         }:
             return 0
         else:
@@ -199,42 +199,29 @@ class ZCL:
         and append the resulting byte list to buf_list
         '''
         if self.data_type in {
-            self.ZCL_DATATYPE_DATA8,
-            self.ZCL_DATATYPE_BOOLEAN,
-            self.ZCL_DATATYPE_BITMAP8,
-            self.ZCL_DATATYPE_INT8,
-            self.ZCL_DATATYPE_UINT8,
-            self.ZCL_DATATYPE_ENUM8,
+            self.ZCL_DATATYPE_DATA8, self.ZCL_DATATYPE_BOOLEAN,
+            self.ZCL_DATATYPE_BITMAP8, self.ZCL_DATATYPE_INT8,
+            self.ZCL_DATATYPE_UINT8, self.ZCL_DATATYPE_ENUM8,
         }:
             buf_list.append(data[0: 1])
         elif self.data_type in {
-        self.ZCL_DATATYPE_DATA16,
-        self.ZCL_DATATYPE_BITMAP16,
-        self.ZCL_DATATYPE_UINT16,
-        self.ZCL_DATATYPE_INT16,
-        self.ZCL_DATATYPE_ENUM16,
-        self.ZCL_DATATYPE_SEMI_PREC,
-        self.ZCL_DATATYPE_CLUSTER_ID,
-        self.ZCL_DATATYPE_ATTR_ID,
+            self.ZCL_DATATYPE_DATA16, self.ZCL_DATATYPE_BITMAP16,
+            self.ZCL_DATATYPE_UINT16, self.ZCL_DATATYPE_INT16,
+            self.ZCL_DATATYPE_ENUM16, self.ZCL_DATATYPE_SEMI_PREC,
+            self.ZCL_DATATYPE_CLUSTER_ID, self.ZCL_DATATYPE_ATTR_ID,
         }:
             buf_list.append(data[0: 2])
         elif self.data_type in {
-        self.ZCL_DATATYPE_DATA24,
-        self.ZCL_DATATYPE_BITMAP24,
-        self.ZCL_DATATYPE_UINT24,
-        self.ZCL_DATATYPE_INT24,
+            self.ZCL_DATATYPE_DATA24, self.ZCL_DATATYPE_BITMAP24,
+            self.ZCL_DATATYPE_UINT24, self.ZCL_DATATYPE_INT24,
         }:
             buf_list.append(data[0: 3])
         elif self.data_type in {
-        self.ZCL_DATATYPE_DATA32,
-        self.ZCL_DATATYPE_BITMAP32,
-        self.ZCL_DATATYPE_UINT32,
-        self.ZCL_DATATYPE_INT32,
-        self.ZCL_DATATYPE_SINGLE_PREC,
-        self.ZCL_DATATYPE_TOD,
-        self.ZCL_DATATYPE_DATE,
-        self.ZCL_DATATYPE_UTC,
-        self.ZCL_DATATYPE_BAC_OID,
+            self.ZCL_DATATYPE_DATA32, self.ZCL_DATATYPE_BITMAP32,
+            self.ZCL_DATATYPE_UINT32, self.ZCL_DATATYPE_INT32,
+            self.ZCL_DATATYPE_SINGLE_PREC, self.ZCL_DATATYPE_TOD,
+            self.ZCL_DATATYPE_DATE, self.ZCL_DATATYPE_UTC,
+            self.ZCL_DATATYPE_BAC_OID,
         }:
             buf_list.append(data[0: 4])
         elif self.data_type == self.ZCL_DATATYPE_UINT40:
@@ -244,14 +231,12 @@ class ZCL:
         elif self.data_type == self.ZCL_DATATYPE_IEEE_ADDR:
             buf_list.append(data[0: 8])
         elif self.data_type in {
-        self.ZCL_DATATYPE_CHAR_STR,
-        self.ZCL_DATATYPE_OCTET_STR,
+            self.ZCL_DATATYPE_CHAR_STR, self.ZCL_DATATYPE_OCTET_STR,
         }:
             str_len = data[0]
             buf_list.append(data[0: str_len + 1])
         elif self.data_type in {
-        self.ZCL_DATATYPE_LONG_CHAR_STR,
-        self.ZCL_DATATYPE_LONG_OCTET_STR,
+            self.ZCL_DATATYPE_LONG_CHAR_STR, self.ZCL_DATATYPE_LONG_OCTET_STR,
         }:
             str_len = data[0] + (data[1] << 8)
             buf_list.append(data[0: str_len + 2])

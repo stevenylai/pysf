@@ -40,8 +40,10 @@ class Device(Base):
             rfm_packet = packet.payload
             if self.listened == rfm.Payload.ADDR_RFM_BCAST:
                 return packet
-            elif rfm_packet.src == self.listened \
-               or rfm_packet.dest == self.listened:
+            elif (
+                rfm_packet.src == self.listened or
+                rfm_packet.dest == self.listened
+            ):
                 return packet
             else:
                 return None

@@ -23,7 +23,7 @@ class Listener(listen.Listener):
         )
         log_filename = self.device.bindable
         match = re.compile('[^:]+').search(log_filename)
-        if match != None:
+        if match is not None:
             log_filename = match.group()
         file_handler = logging.handlers.RotatingFileHandler(
             log_filename + '_' + hex(self.device.listened) + '.log',

@@ -104,6 +104,7 @@ class Integer2Bytes(PacketField):
             value = value >> 8
         super().__set__(instance, b''.join(result))
 
+
 class Typed(PacketField):
     '''Typed packet field'''
     ty = object

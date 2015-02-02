@@ -14,12 +14,13 @@ class RfmPayload(fields.PacketSelector):
         if parent.type == parent.TYPE_SOCKET_POWER:
             from . import socket_power
             return socket_power.Packet
-        elif parent.type == parent.TYPE_SOCKET_STATUS or \
-        toggled_type(parent.type) == parent.TYPE_SOCKET_STATUS:
+        if (
+            parent.type == parent.TYPE_SOCKET_STATUS or
+            toggled_type(parent.type) == parent.TYPE_SOCKET_STATUS
+        ):
             from . import socket_status
             return socket_status.Packet
-        else:
-            return base.BarePayload
+        return base.BarePayload
 
 
 class Payload(base.Packet):

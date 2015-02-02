@@ -23,6 +23,7 @@ class ZCLDataItem(fields.Integer2Bytes):
         '''
         return self.get_raw_packet(instance, cls)
 
+
 class ZCLData(base.Packet):
     '''Individual ZCL data packet'''
     attr_id = fields.SizedHex(length=2)

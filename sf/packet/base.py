@@ -85,7 +85,8 @@ class Packet(metaclass=PacketType):
             raw_packet = update_packet(
                 raw_packet, offset, packet, truncate
             )
-            self.parent.set_raw_packet(self.offset, raw_packet, self.last_field)
+            self.parent.set_raw_packet(self.offset, raw_packet,
+                                       self.last_field)
 
     def __len__(self):
         if self._length is not None:

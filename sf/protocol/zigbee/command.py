@@ -6,6 +6,7 @@ from . import AddressField
 class ZCLCommandData(fields.SizedHex):
     '''ZCL command data'''
     _command_length = 0
+
     def __init__(self, length=None, offset=None, name=None):
         super().__init__(length, offset, name)
         self._length = 1

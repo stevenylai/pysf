@@ -7,16 +7,21 @@ except ImportError:
 projects = ['pysf']
 data_extensions = set()
 
+
 class PackageFinder:
+    '''Python package finder'''
     def __init__(self, projects, data_extension):
         self.projects = projects
         self.data_extension = data_extension
+
     def find_belong(self, path):
         head = path
         while head.replace(os.sep, '.') not in self.packages:
             head, _ = os.path.split(head)
         return head.replace(os.sep, '.')
+
     def search(self):
+        '''Search for packages'''
         self.packages = []
         self.package_data = {}
         for dir in self.projects:
@@ -38,10 +43,10 @@ class PackageFinder:
 finder = PackageFinder(projects, data_extensions)
 finder.search()
 
-setup (
-    name = 'PySF',
-    version = '0.0.1',
-    description = 'Python script connecting to Hub via SF',
-    packages = finder.packages,
-    package_data = finder.package_data
+setup(
+    name='Engel',
+    version='0.0.1',
+    description='Python script connecting to Hub via SF',
+    packages=finder.packages,
+    package_data=finder.package_data
 )

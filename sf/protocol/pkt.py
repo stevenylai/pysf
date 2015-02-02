@@ -24,8 +24,7 @@ class PktPayload(fields.PacketSelector):
     '''PKT payload'''
     def get_packet_cls(self, parent):
         '''Get payload packet class'''
-        self.offset = parent.META_HEADER_LENGTH + \
-                      parent.header_length
+        self.offset = parent.META_HEADER_LENGTH + parent.header_length
         if parent.type == parent.TYPE_RFM:
             from . import rfm
             return rfm.Payload
@@ -36,6 +35,7 @@ class PktPayload(fields.PacketSelector):
             raise TypeError(
                 "Payload not defined for type: %s" % hex(parent.type)
             )
+
 
 class Packet(base.Packet):
     '''PKT structure'''

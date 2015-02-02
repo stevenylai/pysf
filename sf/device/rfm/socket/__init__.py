@@ -37,8 +37,8 @@ class Device(base.Device):
                 )
             )
         elif rfm_packet.type in {
-        rfm_packet.TYPE_SOCKET_STATUS,
-        toggled_type(rfm_packet.TYPE_SOCKET_STATUS),
+            rfm_packet.TYPE_SOCKET_STATUS,
+            toggled_type(rfm_packet.TYPE_SOCKET_STATUS),
         }:
             return 'on_off: {on_off}'.format(
                 on_off=rfm_packet.payload.status
