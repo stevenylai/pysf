@@ -2,18 +2,18 @@
 import re
 import argparse
 import asyncio
+from engel.core.device import base
 
 
-class Device:
+class Device(base.Device):
     '''Base device abstraction using asyncio'''
     def __init__(self, event_loop, bindable='127.0.0.1:3000', key=b''):
         '''Device creation'''
-        self.event_loop = event_loop
+        super().__init__(event_loop)
         self.bindable = bindable
         self.sf = None
         self.key = key
         self.arg_parser = argparse.ArgumentParser()
-        self.readers = []
 
     def cmdline_parser(self):
         '''Get the command line parser'''
@@ -69,12 +69,6 @@ class Device:
     def write(self, packet):
         '''Write a packet to device'''
         self.sf.writePacket(packet)
-
-    def read(self):
-        '''Read from device'''
-        read_future = asyncio.Future()
-        self.readers.append(read_future)
-        return read_future
 
     def packet_string(self, packet):
         '''Packet string'''

@@ -26,9 +26,9 @@ class Scanner(base.Scanner):
         devices = map(evdev.InputDevice, evdev.list_devices())
         self.reset()
         for dev in devices:
-            if pattern.search(dev.name) != None:
+            if pattern.search(dev.name) is not None:
                 self.dev_node = dev.fn
-        if self.dev_node == None:
+        if self.dev_node is None:
             raise FileNotFoundError(
                 "Cannot find scanner with name like " + name_pattern
             )
@@ -37,6 +37,7 @@ class Scanner(base.Scanner):
 
     def reset(self):
         '''Reset the scanner's state'''
+        self.readers.clear()
         self.code = ""
         self.lshift = None
         self.rshift = None
@@ -74,8 +75,8 @@ class Scanner(base.Scanner):
             if event.code == evdev.ecodes.KEY_ENTER:
                 for future in self.readers:
                     future.set_result(self.code)
-                self.readers.clear()
                 self.reset()
+                return
             self.code = self.code + keys[event.code]
             if keys[event.code] == 'X' and event.code != evdev.ecodes.KEY_X:
                 LOGGER.warning("Ignoring unexpected code: %s", event.code)
