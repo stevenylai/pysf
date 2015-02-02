@@ -17,11 +17,15 @@ CAPKEYS = (
 
 
 class Scanner(base.Scanner):
-    '''Code scanner class'''
-    def __init__(self, event_loop, name_pattern):
+    '''Code scanner class.
+    The codes scanned are actually ASCII
+    but are converted according to the encoding settings
+    '''
+    def __init__(self, event_loop, name_pattern, encode='utf-8'):
         '''Create scanner'''
         super().__init__(event_loop)
         self.dev_node = None
+        self.encode = encode
         pattern = re.compile(name_pattern)
         devices = map(evdev.InputDevice, evdev.list_devices())
         self.reset()
@@ -74,7 +78,7 @@ class Scanner(base.Scanner):
         if event.value == evdev.events.KeyEvent.key_down:
             if event.code == evdev.ecodes.KEY_ENTER:
                 for future in self.readers:
-                    future.set_result(self.code)
+                    future.set_result(bytes(self.code, self.encode))
                 self.reset()
                 return
             self.code = self.code + keys[event.code]
