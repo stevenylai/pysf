@@ -1,11 +1,27 @@
 '''ZCL base device'''
-from .. import base
+# Note that we cannot do the following because
+# base already has the Device name:
+# from .. import base
+# class Device(base.Device):
+#     ...
+from ..base import Device as ZigbeeDevice
 
 
-class Device(base.Device):
+class Device(ZigbeeDevice):
     '''ZCL base device class'''
     ZCL_CMD_READ = 0x00
     ZCL_CMD_CONFIG_REPORT = 0x06
+
+    def __init__(self, event_loop, bindable='127.0.0.1:3000', key=b''):
+        '''Create the device and set an empty command item.
+        In case of command length is 0,
+        we still need to fill in an empty command
+        '''
+        super().__init__(event_loop, bindable, key)
+        from ....protocol.zigbee import command
+        cmd = command.ZCLCommand()
+        cmd.one_byte = 0x0
+        self.empty_command = [cmd]
 
     def do_bind(self, bind_type, mac, addr, end_point, cluster_id):
         '''Bind/unbind'''
@@ -36,6 +52,8 @@ class Device(base.Device):
         for cmd in cmd_list:
             total_len += len(cmd)
         packet.payload.payload.cmd_fmt_len = total_len
+        if total_len == 0:
+            cmd_list = self.empty_command
         packet.payload.payload.cmd_fmt = cmd_list
         self.send_packet(packet)
 
@@ -58,3 +76,56 @@ class Device(base.Device):
         self.zcl_command(addr, src_ep, cluster_id, ZCL_CMD_READ, 0,
                          direction, manu_code, seq, disable_default_rsp,
                          cmd_list)
+
+    def extract_read(self, zigbee_packet):
+        '''Process read attribute
+        The parameter here must be an
+        attribute packet.
+
+        The function will return the processed
+        data in JSON format
+        '''
+        from ...protocol.zigbee.zcl import ZCL
+        attr_pkt = zigbee_packet.payload
+        zcl = get_cluster_module(attr_pkt.cluster_id)
+        if zcl is None:  # Unknown cluster
+            return None
+        extracted_list = []
+        for i in range(0, attr_pkt.num_attr):
+            attr_item = attr_pkt.attr_data[i]
+            accessor = ZCL(attr_item.data_type)
+            for name in zcl.ATTRIBUTES.keys():
+                if zcl.ATTRIBUTES[name]['id'] == attr_item.attr_id:
+                    extracted_list.append(
+                        {name: accessor.to_python(attr_item.data)}
+                    )
+        return extracted_list
+
+    def attribute_read(self, is_read, attribute):
+        '''Process the read attribute.
+        Override to implement custom logics
+        if this method returns True, then
+        the coresponding read/report packet will not
+        be notified again
+        '''
+        return False
+
+    def filter_packet(self, raw_packet):
+        '''Filter packets'''
+        packet = super().filter_packet(raw_packet)
+        if packet is None:
+            return packet
+        zigbee_packet = packet.payload
+        if zigbee_packet.type in {
+            zigbee_packet.TYPE_ATTR_READ,
+            zigbee_packet.TYPE_ATTR_REPORT
+        }:
+            attr = self.extract_read(zigbee_packet)
+            if self.attribute_read(
+                (
+                    True if zigbee_packet.type == zigbee_packet.TYPE_ATTR_READ
+                    else False
+                ), attr
+            ):
+                return None
+        return packet

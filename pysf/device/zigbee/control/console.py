@@ -6,6 +6,19 @@ import sys
 from ... import listen
 
 
+def _convert_args(arg):
+    '''Convert string arg to different types
+    according to their pattern
+    '''
+    match = re.compile('^[0-9]+$').search(arg)
+    if match is not None:
+        return int(arg)
+    match = re.compile('^0[xX][0-9A-Fa-f]+').search(arg)
+    if match is not None:
+        return int(arg, 16)
+    return arg
+
+
 class Control(listen.Listener):
     '''Zigbee console controller class.
     In addition to monitoring the zigbee packets,
@@ -17,15 +30,17 @@ class Control(listen.Listener):
         line = sys.stdin.readline().strip(os.linesep)
         args = []
         for match in re.compile('[^ \t]+').finditer(line):
-            args.append(match.group())
+            args.append(_convert_args(match.group()))
+        if len(args) < 0:
+            return
         if hasattr(self, args[0]):
             func = getattr(self, args[0])
             if not callable(func):
-                print("Unknown command:", line)
+                print("Command not callable:", args[0])
             else:
                 func(*args[1:])
         else:
-            print("Unknown command:", line)
+            print("Command not avail:", args[0])
 
     def create_device(self):
         '''Create device for control'''

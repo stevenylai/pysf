@@ -23,4 +23,5 @@ class Device(base.Device):
     def send_packet(self, packet):
         '''Send a Zigbee packet'''
         packet.payload.set_length()
+        print("Send packet: ", packet.get_raw_packet())
         self.sf.writePacket(packet.get_raw_packet())

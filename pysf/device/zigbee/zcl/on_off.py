@@ -16,14 +16,14 @@ class Device(base.Device):
 
     def on(self, addr, src_ep, seq, disable_default_rsp):
         '''Turn on'''
-        from ...protocol.zigbee import command
-        self.zcl_command(addr, src_ep, CLUSTR_ID, self.COMMAND_ON, 1,
+        from ....protocol.zigbee import command
+        self.zcl_command(addr, src_ep, CLUSTER_ID, self.COMMAND_ON, 1,
                          command.Packet.ZCL_FRAME_CLIENT_SERVER_DIR,
                          0, seq, disable_default_rsp, [])
 
     def off(self, addr, src_ep, seq, disable_default_rsp):
         '''Turn off'''
-        from ...protocol.zigbee import command
-        self.zcl_command(addr, src_ep, CLUSTR_ID, self.COMMAND_OFF, 1,
+        from ....protocol.zigbee import command
+        self.zcl_command(addr, src_ep, CLUSTER_ID, self.COMMAND_OFF, 1,
                          command.Packet.ZCL_FRAME_CLIENT_SERVER_DIR,
                          0, seq, disable_default_rsp, [])

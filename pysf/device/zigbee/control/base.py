@@ -70,6 +70,10 @@ class Control(listen.Listener):
         else:
             return self.device_list[self.current_control]
 
+    def resolve(self, mac):
+        '''Resolve a device zigbee address'''
+        self.device.resolve(mac)
+
     def pair(self):
         '''Pair a device'''
         from ....protocol import zigbee
