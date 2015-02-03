@@ -31,7 +31,7 @@ class Control(listen.Listener):
         args = []
         for match in re.compile('[^ \t]+').finditer(line):
             args.append(_convert_args(match.group()))
-        if len(args) < 0:
+        if len(args) < 1:
             return
         if hasattr(self, args[0]):
             func = getattr(self, args[0])

@@ -29,11 +29,9 @@ class Device(base.Device):
 
     def cmdline_parsed(self):
         '''Get the parsed cmdline args'''
-        from ..core.SFSource import SFSource
         args = self.arg_parser.parse_args()
         if args.bindable is not None:
             self.bindable = args.bindable
-        self.sf = SFSource(None, self.bindable)
         if args.key is not None:
             self.key = bytes(args.key, 'utf-8')
         return args
@@ -56,6 +54,8 @@ class Device(base.Device):
 
     def open(self):
         '''Open the device'''
+        from ..core.SFSource import SFSource
+        self.sf = SFSource(None, self.bindable)
         self.sf.open(self.key)
         self.event_loop.add_reader(self.sf.fileno(), self._read_sf_packet)
 

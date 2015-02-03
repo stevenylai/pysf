@@ -15,6 +15,10 @@ class Light(Device, interruptable.Device):
             return prepared['found']
         return None
 
+    def clear(self):
+        '''Clear'''
+        print('Cleared')
+
     def on(self):
         '''on'''
         print("Turning on")

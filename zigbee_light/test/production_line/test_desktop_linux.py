@@ -26,6 +26,7 @@ class Production(test.Production, desktop_linux.Production):
         yield from super().start()
         self.devices['panel'].update(None)
 
+
 class TestProduction(test_production.Base):
     '''Production base test case'''
     def setUp(self):
@@ -38,6 +39,7 @@ class TestProduction(test_production.Base):
             self.event_loop, {
                 'wait_for_light': {'active': [light]},
                 'control_light': {'active': [light]},
+                'confirm_light': {'active': [scanner]},
                 'all': [light, scanner, panel],
             }, 'wait_for_light', self
         )
