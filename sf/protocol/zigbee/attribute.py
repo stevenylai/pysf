@@ -3,25 +3,21 @@ from ...packet import base, fields
 from . import AddressField
 
 
-class ZCLDataItem(fields.Integer2Bytes):
+class ZCLDataItem(fields.PacketField):
     '''ZCL data item'''
     def __set__(self, instance, value):
         self._length = len(instance) - 4
         super().__set__(instance, value)
-
-    def get_raw_packet(self, instance, cls):
-        '''Get raw packet'''
-        raw_packet = instance.get_raw_packet()
-        return raw_packet[
-            self.offset: self.offset + len(instance)
-        ]
 
     def __get__(self, instance, cls):
         '''Return the raw bytes because the actual value
         will depend on the data_type field in the parent
         packet
         '''
-        return self.get_raw_packet(instance, cls)
+        raw_packet = instance.get_raw_packet()
+        return raw_packet[
+            self.offset: self.offset + len(instance)
+        ]
 
 
 class ZCLData(base.Packet):
@@ -30,6 +26,9 @@ class ZCLData(base.Packet):
     status = fields.SizedHex(length=1)
     data_type = fields.SizedHex(length=1)
     data = ZCLDataItem()
+
+    # TODO: we probably need some set/get data functions
+    # here to access the data field
 
     def __len__(self):
         '''Get total length'''

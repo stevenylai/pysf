@@ -65,8 +65,8 @@ class TestZigbee(unittest.TestCase):
 
     def test_attribute(self):
         '''Test attribute read/report packet'''
-        attr1 = self.gen_zcl_data(0x08, 0x12)
-        attr2 = self.gen_zcl_data(0x09, 0x1234)
+        attr1 = self.gen_zcl_data(0x08, b'\x12')
+        attr2 = self.gen_zcl_data(0x09, b'\x34\x12')
         packet = self.gen_attribute([attr1, attr2])
         self.assertEqual(b"\x02\x00\x01\x00\x00\x00'\x00"
                          b'\x06\x00#\x00\x01'

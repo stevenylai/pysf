@@ -10,6 +10,9 @@ class Production:
         self.device_table = device_table
         self.initial_state = initial_state
         self.active_devices = []
+        self.devices = {}
+        for item in self.device_table.values():
+            self.devices[item.name] = item
 
     @asyncio.coroutine
     def change_state(self, new_state):

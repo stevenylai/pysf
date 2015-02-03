@@ -1,8 +1,8 @@
 import os
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup
 except ImportError:
-    from distutils.core import setup, Extension
+    from distutils.core import setup
 
 projects = ['pysf']
 data_extensions = set()

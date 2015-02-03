@@ -5,6 +5,7 @@ from engel.core.device import interruptable
 
 class Device(Device. interruptable.Device):
     '''Light device class'''
+    name = 'light'
     end_point = 1
 
     def __init__(self, event_loop, bindable='127.0.0.1:3000', key=b''):

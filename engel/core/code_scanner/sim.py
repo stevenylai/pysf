@@ -1,8 +1,9 @@
 '''Simulated scanner'''
 from ..device import sim
+from . import base
 
 
-class Scanner(sim.Device):
+class Scanner(sim.Device, base.Scanner):
     '''Simulated scanner'''
     encode = 'utf-8'
 
