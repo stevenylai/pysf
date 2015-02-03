@@ -4,4 +4,4 @@ from ..device import base
 
 class Scanner(base.Device):
     '''Scanner class'''
-    pass
+    name = 'scanner'
