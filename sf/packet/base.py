@@ -25,9 +25,30 @@ class PacketType(type):
 
     def __new__(cls, clsname, bases, clsdict):
         from .fields import PacketField
+        cur_offset = 0
         fields = [key for key, val in clsdict.items()
                   if isinstance(val, PacketField)]
-        cur_offset = 0
+        for base_cls in bases:
+            for name, value in base_cls.__dict__.items():
+                if name in fields:
+                    if clsdict[name]._length is None:
+                        clsdict[name]._length = value._length
+                        continue
+                    elif clsdict[name]._length != value._length:
+                        raise TypeError(
+                            'Cannot change the length of a field '
+                            'already defined in the parent class'
+                        )
+                if isinstance(value, PacketField):
+                    if value.offset is not None and value._length is not None:
+                        if value.offset + value._length > cur_offset:
+                            cur_offset = value.offset + value._length
+                    elif len(fields) > 0:
+                        # TODO: maybe it's OK if it is last_field?
+                        raise TypeError(
+                            'Cannot create fields after '
+                            'a variable-lengthed packet'
+                        )
         for name in fields:
             clsdict[name].name = name
             if clsdict[name].offset is None:

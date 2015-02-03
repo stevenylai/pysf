@@ -1,13 +1,8 @@
 '''ZCL base device'''
-# Note that we cannot do the following because
-# base already has the Device name:
-# from .. import base
-# class Device(base.Device):
-#     ...
-from ..base import Device as ZigbeeDevice
+from .. import base
 
 
-class Device(ZigbeeDevice):
+class Device(base.Device):
     '''ZCL base device class'''
     ZCL_CMD_READ = 0x00
     ZCL_CMD_CONFIG_REPORT = 0x06
