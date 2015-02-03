@@ -3,7 +3,7 @@ from sf.device.zigbee.light import Device
 from engel.core.device import interruptable
 
 
-class Device(Device. interruptable.Device):
+class Light(Device. interruptable.Device):
     '''Light device class'''
     name = 'light'
     end_point = 1

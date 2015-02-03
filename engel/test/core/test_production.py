@@ -42,7 +42,7 @@ class TestProduction(Base):
         '''Setup test'''
         super().setUp()
         self.production = Production(
-            self.event_loop, {}, 'dummy_state', self
+            self.event_loop, {'all': []}, 'dummy_state', self
         )
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ class Panel(sim.Device, base.Panel):
     def get_sim_data(self, prepared):
         '''Get sim data'''
         if isinstance(prepared, dict) and 'input' in prepared:
-            return prepared['input']
+            return bytes(prepared['input'], self.encode)
         return None
 
     def write(self, output):

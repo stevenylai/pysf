@@ -10,5 +10,5 @@ class Scanner(sim.Device, base.Scanner):
     def get_sim_data(self, prepared):
         '''Get sim data'''
         if isinstance(prepared, dict) and 'code' in prepared:
-            return prepared['code']
+            return bytes(prepared['code'], self.encode)
         return None

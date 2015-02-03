@@ -50,7 +50,9 @@ class Production(base.Production):
             if f.endswith('.json') and f != 'state_info.json'
         ]
         for data_file in data_files:
-            with open(data_file, 'r') as data_content:
+            with open(
+                os.path.join(self.current_case_state, data_file), 'r'
+            ) as data_content:
                 test_data = json.load(data_content)
             match = re.compile(r'(.+)\.json').search(data_file)
             if match is not None:
@@ -64,7 +66,13 @@ class Production(base.Production):
 
     @asyncio.coroutine
     def change_state(self, new_state):
-        state_info = self.load_test_data(new_state)
+        '''Before change the state, we first
+        populate all the sim devices with data
+        '''
+        try:
+            state_info = self.load_test_data(new_state)
+        except:
+            print("Exception when loading data")
         next_state = yield from super().change_state(new_state)
         if state_info is not None and self.tester is not None:
             self.tester.assertEqual(next_state,

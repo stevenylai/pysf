@@ -6,9 +6,12 @@ class Production:
     '''Production base class'''
     def __init__(self, event_loop, device_table, initial_state):
         '''Create production line.
-        device_table is a dictionary containing the states and
-        the corresponding devices. At the top level of the dictionary,
-        are the states' names as the key.
+
+        device_table is a dictionary and contains the following:
+
+        * 'all': is a list of all devices
+        * '<state>': the device information for a particular state
+
         Then for each state, there is a dictionary of the following
         structure:
         {
@@ -22,7 +25,7 @@ class Production:
         self.stopped = False
         self.active_devices = []
         self.devices = {}
-        for item in self.device_table.values():
+        for item in device_table['all']:
             self.devices[item.name] = item
 
     @asyncio.coroutine

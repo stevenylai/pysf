@@ -4,8 +4,6 @@ import asyncio
 
 class Device:
     '''Device class'''
-    name = 'device'
-
     def __init__(self, event_loop):
         '''Device creator'''
         self.event_loop = event_loop
