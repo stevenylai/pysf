@@ -9,6 +9,10 @@ class Device:
         self.event_loop = event_loop
         self.readers = []
 
+    def open(self):
+        '''Open the device'''
+        pass
+
     def read(self):
         '''Read the device asynchronously'''
         future = asyncio.Future()

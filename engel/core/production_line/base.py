@@ -40,7 +40,7 @@ class Production:
 
     def interrupt(self, exc=None):
         '''Interrupt the production'''
-        for device in self.active_devices:
+        for device in self.devices.values():
             device.interrupt(exc)
 
     @asyncio.coroutine

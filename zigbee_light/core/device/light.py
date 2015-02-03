@@ -19,6 +19,8 @@ class Light(Device, interruptable.Device):
         packet = super().filter_packet(raw_packet)
         if packet is None:
             return None
+        if len(self.readers) == 0: # No one is interested
+            return None
         zigbee_packet = packet.payload
         if zigbee_packet.type == zigbee_packet.TYPE_RESOLVE and \
            zigbee_packet.payload.type == zigbee_packet.payload.TYPE_ADDR_JOIN:

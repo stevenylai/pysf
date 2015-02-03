@@ -53,6 +53,7 @@ class Production(base.Production):
             if panel_input == BUTTON_STOP:
                 self.interrupt()
 
+
 def start(scanner_name):
     '''Start the line'''
     from ..core.device import light
