@@ -15,10 +15,12 @@ class Base(unittest.TestCase):
     def test_production(self):
         '''Run the test'''
         if self.production is not None:
-            asyncio.wait(
-                [self.production.start(),
-                 self.production.watch_events()],
-                loop=self.event_loop
+            self.event_loop.run_until_complete(
+                asyncio.wait(
+                    [self.production.start(),
+                     self.production.watch_events()],
+                    loop=self.event_loop
+                )
             )
 
 
@@ -27,7 +29,7 @@ class Production(test.Production):
     @asyncio.coroutine
     def dummy_state(self):
         '''Dummy state'''
-        pass
+        return 'dummy_state'
 
     def get_test_data_dir(self):
         '''Get the directory for test cases'''

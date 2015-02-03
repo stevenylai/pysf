@@ -7,8 +7,8 @@ class Scanner(sim.Device, base.Scanner):
     '''Simulated scanner'''
     encode = 'utf-8'
 
-    def update(self, data):
-        '''Update simulated data'''
-        if isinstance(data, dict) and 'code' in data:
-            for future in self.readers:
-                future.set_result(bytes(data['code'], self.encode))
+    def get_sim_data(self, prepared):
+        '''Get sim data'''
+        if isinstance(prepared, dict) and 'code' in prepared:
+            return prepared['code']
+        return None

@@ -1,1 +1,5 @@
 '''Production settings'''
+BUTTON_STOP = b's'
+BUTTON_CONFIRM = b'c'
+BUTTON_ON = b'n'
+BUTTON_OFF = b'f'

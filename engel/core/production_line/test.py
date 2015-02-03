@@ -37,20 +37,14 @@ class Production(base.Production):
                 return json.load(state_info)
         return None
 
-    @asyncio.coroutine
-    def load_test_data(self, previous_state, state):
+    def load_test_data(self, state):
         '''Load the test data'''
         self.current_case_state = os.path.join(
             self.data_dir, self.current_data_dir, state
         )
         if not os.path.isdir(self.current_case_state):
-            return
+            return None
         state_info = self.get_state_info()
-        if state_info is not None and self.tester is not None:
-            self.tester.assertEqual(state_info['previous_state'],
-                                    previous_state)
-            self.tester.assertEqual(state_info['current_state'],
-                                    state)
         data_files = [
             f for f in os.listdir(self.current_case_state)
             if f.endswith('.json') and f != 'state_info.json'
@@ -65,11 +59,14 @@ class Production(base.Production):
             if state_info['finish']:
                 self.current_case_idx += 1
                 if self.current_case_idx >= len(self.all_cases):
-                    self.event_loop.stop()
+                    self.stopped = True
+        return state_info
 
     @asyncio.coroutine
     def change_state(self, new_state):
-        '''Change the state and load the new test data'''
-        previous_state = self.state
-        yield from super().change_state(new_state)
-        yield from self.load_test_data(previous_state, new_state)
+        state_info = self.load_test_data(new_state)
+        next_state = yield from super().change_state(new_state)
+        if state_info is not None and self.tester is not None:
+            self.tester.assertEqual(next_state,
+                                    state_info['next_state'])
+        return next_state

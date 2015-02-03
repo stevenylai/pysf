@@ -7,11 +7,11 @@ class Panel(sim.Device, base.Panel):
     '''Simulated panel'''
     encode = 'utf-8'
 
-    def update(self, data):
-        '''Update simulated data'''
-        if isinstance(data, dict) and 'input' in data:
-            for future in self.readers:
-                future.set_result(bytes(data['input'], self.encode))
+    def get_sim_data(self, prepared):
+        '''Get sim data'''
+        if isinstance(prepared, dict) and 'input' in prepared:
+            return prepared['input']
+        return None
 
     def write(self, output):
         '''Write to panel'''

@@ -18,8 +18,8 @@ class Production:
         '''
         self.event_loop = event_loop
         self.device_table = device_table
-        self.initial_state = initial_state
-        self.state = None
+        self.state = initial_state
+        self.stopped = False
         self.active_devices = []
         self.devices = {}
         for item in self.device_table.values():
@@ -32,7 +32,8 @@ class Production:
             self.active_devices = self.device_table[new_state]['active']
         self.state = new_state
         state_handler = getattr(self, new_state)
-        yield from state_handler()
+        next_state = yield from state_handler()
+        return next_state
 
     def interrupt(self, exc=None):
         '''Interrupt the production'''
@@ -47,4 +48,9 @@ class Production:
     @asyncio.coroutine
     def start(self):
         '''Start production'''
-        yield from self.change_state(self.initial_state)
+        next_state = self.state
+        while not self.stopped:
+            try:
+                next_state = yield from self.change_state(next_state)
+            except InterruptedError:
+                next_state = self.state

@@ -20,6 +20,14 @@ class Production(base.Production):
         '''Notify the server and confirm the production of a light'''
         pass
 
+    @asyncio.coroutine
+    def watch_events(self):
+        '''Event watcher'''
+        from . import settings
+        while True:
+            panel_input = yield from self.devices['panel'].read()
+            if panel_input == settings.BUTTON_STOP:
+                self.interrupt()
 
 def start():
     '''Start the production line'''
