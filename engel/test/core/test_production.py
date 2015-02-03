@@ -39,6 +39,5 @@ class TestProduction(Base):
             self.event_loop, {}, 'dummy_state', self
         )
 
-
 if __name__ == '__main__':
     unittest.main()

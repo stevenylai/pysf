@@ -33,22 +33,27 @@ class Production(base.Production):
         state_info_file = os.path.join(self.current_case_state,
                                        'state_info.json')
         if os.path.isfile(state_info_file):
-            with open(state_info_file, 'r') as f:
-                return json.load(f)
+            with open(state_info_file, 'r') as state_info:
+                return json.load(state_info)
         return None
 
     @asyncio.coroutine
-    def load_test_data(self, state):
+    def load_test_data(self, previous_state, state):
         '''Load the test data'''
-        self.current_case_state = os.path.join(self.current_data_dir, state)
+        self.current_case_state = os.path.join(
+            self.data_dir, self.current_data_dir, state
+        )
         if not os.path.isdir(self.current_case_state):
             return
         state_info = self.get_state_info()
         if state_info is not None and self.tester is not None:
-            self.tester.assertEqual(state_info['expected_state'], state)
+            self.tester.assertEqual(state_info['previous_state'],
+                                    previous_state)
+            self.tester.assertEqual(state_info['current_state'],
+                                    state)
         data_files = [
             f for f in os.listdir(self.current_case_state)
-            if f.endswith('.json')
+            if f.endswith('.json') and f != 'state_info.json'
         ]
         for data_file in data_files:
             with open(data_file, 'r') as data_content:
@@ -57,13 +62,14 @@ class Production(base.Production):
             if match is not None:
                 self.devices[match.group(1)].update(test_data)
         if state_info is not None:
-            if state_info['advance']:
+            if state_info['finish']:
                 self.current_case_idx += 1
-                if current_data_dir >= len(self.all_cases):
+                if self.current_case_idx >= len(self.all_cases):
                     self.event_loop.stop()
 
     @asyncio.coroutine
     def change_state(self, new_state):
         '''Change the state and load the new test data'''
+        previous_state = self.state
         yield from super().change_state(new_state)
-        yield from self.load_test_data(new_state)
+        yield from self.load_test_data(previous_state, new_state)

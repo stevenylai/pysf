@@ -9,6 +9,7 @@ class Production:
         self.event_loop = event_loop
         self.device_table = device_table
         self.initial_state = initial_state
+        self.state = None
         self.active_devices = []
         self.devices = {}
         for item in self.device_table.values():
