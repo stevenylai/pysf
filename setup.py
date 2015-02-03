@@ -5,7 +5,7 @@ except ImportError:
     from distutils.core import setup
 
 projects = ['pysf']
-data_extensions = set()
+data_extensions = {'.json'}
 
 
 class PackageFinder:

@@ -8,14 +8,14 @@ from . import base
 
 class Production(base.Production):
     '''Production line for testing'''
-    def __init__(self, event_loop, device_table, initial_state, tester):
+    def __init__(self, event_loop, device_table, initial_state, tester=None):
         '''Create a testing line'''
         super().__init__(event_loop, device_table, initial_state)
         self.tester = tester
         self.data_dir = self.get_test_data_dir()
         self.all_cases = sorted([
-            d for d in os.listdir()
-            if os.isdir(os.path.join(self.data_dir, d))
+            d for d in os.listdir(self.data_dir)
+            if os.path.isdir(os.path.join(self.data_dir, d))
         ])
         self.current_case_idx = 0
 
@@ -26,7 +26,7 @@ class Production(base.Production):
 
     def get_test_data_dir(self):
         '''Get the directory for test cases'''
-        return os.path.join(os.path.dirname(__file__))
+        return os.path.dirname(__file__)
 
     def get_state_info(self):
         '''Get the state info'''
@@ -44,7 +44,7 @@ class Production(base.Production):
         if not os.path.isdir(self.current_case_state):
             return
         state_info = self.get_state_info()
-        if state_info is not None:
+        if state_info is not None and self.tester is not None:
             self.tester.assertEqual(state_info['expected_state'], state)
         data_files = [
             f for f in os.listdir(self.current_case_state)
@@ -59,8 +59,8 @@ class Production(base.Production):
         if state_info is not None:
             if state_info['advance']:
                 self.current_case_idx += 1
-            if state_info['finish']:
-                self.event_loop.stop()
+                if current_data_dir >= len(self.all_cases):
+                    self.event_loop.stop()
 
     @asyncio.coroutine
     def change_state(self, new_state):

@@ -17,7 +17,8 @@ class Production:
     @asyncio.coroutine
     def change_state(self, new_state):
         '''Change the state'''
-        self.active_devices = self.device_table[new_state]['devices']
+        if new_state in self.device_table:
+            self.active_devices = self.device_table[new_state]['devices']
         self.state = new_state
         state_handler = getattr(self, new_state)
         yield from state_handler()
