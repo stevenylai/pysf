@@ -1,5 +1,9 @@
 '''Produce lights on a desktop Linux computer'''
 import asyncio
+import pprint
+import copy
+import json
+import requests
 from engel.core.production_line import base
 
 BUTTON_STOP = b's'
@@ -32,12 +36,28 @@ class Production(base.Production):
         self.devices['light'].clear()
         return 'confirm_light'
 
+    def submit_light(self, code):
+        '''Submit the light info'''
+        from . import settings
+        payload = copy.copy(settings.ZIGBEE_LIGHT_PARAMS)
+        payload['device_data'] = json.dumps(
+            {
+                'label': code,
+                'mac': self.light_info['mac']
+            }
+        )
+        resp = requests.post(settings.ZIGBEE_LIGHT_URL, params=payload)
+        return resp.text
+
     @asyncio.coroutine
     def confirm_light(self):
         '''Notify the server and confirm the production of a light'''
-        # TODO: access server
         code = yield from self.devices['scanner'].read()
-        print("Confirming", self.light_info, code)
+        result = yield from self.run_in_executor(
+            None, self.submit_light, code.decode('utf-8')
+        )
+        print("Confirming:", pprint.pformat(self.light_info, indent=1),
+              code.decode('utf-8'), "Result:", result)
         return 'wait_for_light'
 
     def interrupt(self, exc=None):
