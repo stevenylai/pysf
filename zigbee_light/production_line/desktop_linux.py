@@ -46,17 +46,19 @@ class Production(base.Production):
                 'mac': self.light_info['mac']
             }
         )
-        resp = requests.post(settings.ZIGBEE_LIGHT_URL, params=payload)
+        print("Submitting to ", settings.ZIGBEE_LIGHT_URL, "with", payload)
+        resp = requests.post(settings.ZIGBEE_LIGHT_URL,
+                             verify=False, params=payload)
         return resp.text
 
     @asyncio.coroutine
     def confirm_light(self):
         '''Notify the server and confirm the production of a light'''
         code = yield from self.devices['scanner'].read()
-        result = yield from self.run_in_executor(
+        result = yield from self.event_loop.run_in_executor(
             None, self.submit_light, code.decode('utf-8')
         )
-        print("Confirming:", pprint.pformat(self.light_info, indent=1),
+        print("Confirmed:", pprint.pformat(self.light_info, indent=1),
               code.decode('utf-8'), "Result:", result)
         return 'wait_for_light'
 
@@ -81,6 +83,7 @@ def start(scanner_name):
     from engel.core.panel import console
 
     event_loop = asyncio.get_event_loop()
+    # light = light.Light(event_loop, bindable='192.168.1.47:3000')
     light = light.Light(event_loop)
     light.open()
     scanner = evdev.Scanner(event_loop, scanner_name)
