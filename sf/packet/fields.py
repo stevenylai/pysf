@@ -132,7 +132,7 @@ class SizedHex(PosInteger):
     '''Sized hex field'''
     def __set__(self, instance, value):
         if self._length is not None:
-            max = math.pow(256, self._length)
-            if value >= max:
-                raise ValueError("Must be < %s" % max)
+            max_value = math.pow(256, self._length)
+            if value >= max_value:
+                raise ValueError("Must be < %s" % max_value)
         super().__set__(instance, value)

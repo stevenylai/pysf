@@ -3,6 +3,7 @@ from . import base
 
 
 class ReportConfig(base.CommandGen):
+    '''ZCL report config packet'''
     ZCL_SEND_ATTR_REPORTS = 0
     ZCL_EXPECT_ATTR_REPORTS = 1
 
@@ -10,12 +11,12 @@ class ReportConfig(base.CommandGen):
                  min_interval=0, max_interval=0, timeout=0,
                  threshold=b''):
         '''Create a ZCL report config'''
-        from . import base
         self.direction = direction
         self.attr_id = attr_id
         self.data_type = base.ZCL(data_type)
         self.min_interval = min_interval
         self.max_interval = max_interval
+        self.timeout = timeout
         self.threshold = threshold
 
     def threshold_commands(self, commands):

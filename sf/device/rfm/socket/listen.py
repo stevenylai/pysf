@@ -1,5 +1,4 @@
 '''Listen to RFM sockets'''
-import asyncio
 from . import Device as Base
 from ....protocol import rfm
 
@@ -36,7 +35,6 @@ class Device(Base):
         if packet is None:
             return packet
         else:
-            from .. import addr_match
             rfm_packet = packet.payload
             if self.listened == rfm.Payload.ADDR_RFM_BCAST:
                 return packet

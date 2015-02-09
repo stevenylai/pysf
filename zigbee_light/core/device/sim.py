@@ -1,8 +1,8 @@
 '''Sim device for testing'''
 from engel.core.device import interruptable
 from engel.core.device.sim import Device
-from engel.core.code_scanner.sim import Scanner
-from engel.core.panel.sim import Panel
+from engel.core.code_scanner.sim import Scanner as SimScanner
+from engel.core.panel.sim import Panel as SimPanel
 
 
 class Light(Device, interruptable.Device):
@@ -28,14 +28,15 @@ class Light(Device, interruptable.Device):
         print("Turning off")
 
     def level(self, level, transtime=0):
+        '''Changing level'''
         print("Changing level to", level, 'with time', transtime)
 
 
-class Scanner(Scanner, interruptable.Device):
+class Scanner(SimScanner, interruptable.Device):
     '''For testing'''
     pass
 
 
-class Panel(Panel, interruptable.Device):
+class Panel(SimPanel, interruptable.Device):
     '''For testing'''
     pass

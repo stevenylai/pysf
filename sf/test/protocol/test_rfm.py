@@ -26,6 +26,7 @@ class TestRfm(unittest.TestCase):
         return packet
 
     def test_read(self):
+        '''Test reading RFM packets'''
         packet = self.gen_power()
         pkt.Packet(data=packet.get_raw_packet())
         self.assertEqual(packet.type, packet.TYPE_RFM)
@@ -39,6 +40,7 @@ class TestRfm(unittest.TestCase):
         self.assertEqual(packet.payload.payload.voltage, 1)
 
     def test_write(self):
+        '''Test setting RFM packets fields'''
         packet = self.gen_power()
         self.assertEqual(
             packet.get_raw_packet(),

@@ -24,6 +24,7 @@ class TestZigbee(unittest.TestCase):
         return packet
 
     def test_addr_info(self):
+        '''Test addr_info'''
         packet = self.gen_addr_info(0x0102030405060708, 0x0102)
         self.assertEqual(b'\x02\x00\x01\x00\x00\x00\x10\x00'
                          b'\x02\x00\x0c\x00'
@@ -77,13 +78,13 @@ class TestZigbee(unittest.TestCase):
                          b'\x01\x00\x00\t4\x12',
                          packet.get_raw_packet())
 
-    def gen_zcl_command(self, value, len):
+    def gen_zcl_command(self, value, cmd_len):
         '''Generate a ZCL attribute data'''
         from ...protocol.zigbee import command
-        if len > 2:
-            raise ValueError("Len must <= 2")
+        if cmd_len > 2:
+            raise ValueError("Command len must <= 2")
         cmd = command.ZCLCommand()
-        if len == 1:
+        if cmd_len == 1:
             cmd.one_byte = value
         else:
             cmd.low_byte = value & 0xFF

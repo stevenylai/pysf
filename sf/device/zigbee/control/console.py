@@ -1,5 +1,4 @@
 '''Zigbee console (command line) controller'''
-import asyncio
 import re
 import os
 import sys
@@ -45,5 +44,5 @@ class Control(listen.Listener):
     def create_device(self):
         '''Create device for control'''
         super().create_device()
-        self.event_loop.add_reader(sys.stdin,
+        self.event_loop.add_reader(sys.stdin.fileno(),
                                    self.zigbee_console_command)

@@ -20,11 +20,10 @@ def update_packet(dest, offset, source, truncate):
 class PacketType(type):
     '''Meta class for packet type'''
     @classmethod
-    def __prepare__(cls, name, bases):
+    def __prepare__(mcs, name, bases):
         return OrderedDict()
 
-    def __new__(cls, clsname, bases, clsdict):
-        from .fields import PacketField
+    def __new__(mcs, clsname, bases, clsdict):
         cur_offset = 0
         fields = [key for key, val in clsdict.items()
                   if isinstance(val, PacketField)]
@@ -61,7 +60,7 @@ class PacketType(type):
                 clsdict[name].last_field = True
             else:
                 clsdict[name].last_field = False
-        clsobj = super().__new__(cls, clsname, bases, dict(clsdict))
+        clsobj = super().__new__(mcs, clsname, bases, dict(clsdict))
         return clsobj
 
 

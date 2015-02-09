@@ -32,9 +32,9 @@ class ZCLData(base.Packet):
 
     def __len__(self):
         '''Get total length'''
-        from .zcl import base
+        from .zcl.base import ZCL
         total_len = 4
-        attr = base.ZCL(self.data_type)
+        attr = ZCL(self.data_type)
         total_len += attr.get_length()
         return total_len
 

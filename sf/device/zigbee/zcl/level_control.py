@@ -22,6 +22,8 @@ class Device(base.Device):
         transtime_cmd = command.ZCLCommand()
         transtime_cmd.low_byte = transtime & 0xFF
         transtime_cmd.high_byte = transtime >> 8 & 0xFF
-        self.zcl_command(addr, src_ep, CLUSTER_ID, self.COMMAND_OFF, 1,
-                         command.Packet.ZCL_FRAME_CLIENT_SERVER_DIR, 0, seq,
-                         disable_default_rsp, [level_cmd, transtime_cmd])
+        self.zcl_command(
+            addr, src_ep, CLUSTER_ID, self.COMMAND_LEVEL_MOVE_TO_LEVEL, 1,
+            command.Packet.ZCL_FRAME_CLIENT_SERVER_DIR, 0, seq,
+            disable_default_rsp, [level_cmd, transtime_cmd]
+        )

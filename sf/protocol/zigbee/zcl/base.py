@@ -152,6 +152,7 @@ class ZCL:
             return False
 
     def to_python(self, data):
+        '''Convert the data to python type'''
         from ....packet import fields
         if self.data_type in {
             self.ZCL_DATATYPE_DATA8,
@@ -192,7 +193,7 @@ class ZCL:
                 return False
             else:
                 return True
-        raise NotImplemented()
+        raise NotImplementedError()
 
     def serialize(self, data, buf_list):
         '''Serialize the data according in the data

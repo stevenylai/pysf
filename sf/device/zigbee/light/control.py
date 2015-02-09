@@ -14,7 +14,7 @@ class Control(base.Control):
             return importlib.import_module(
                 '.' + cluster, self.parent_pkg_name
             )
-        except ImportError as exc:
+        except ImportError:
             return None
 
     @property

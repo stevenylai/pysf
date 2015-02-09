@@ -22,7 +22,6 @@ class Device(base.Device):
         src = rfm_packet.src
         dest = rfm_packet.dest
         rfm_type = rfm_packet.type
-        length = rfm_packet.length
         rssi = (
             packet.header.rssi
             if packet.header_length > 0
