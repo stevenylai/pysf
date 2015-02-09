@@ -57,7 +57,7 @@ class Device(base.Device):
         from ..core.SFSource import SFSource
         self.sf = SFSource(None, self.bindable)
         self.sf.open(self.key)
-        self.event_loop.add_reader(self.sf.fileno(), self._read_sf_packet)
+        self.event_loop.add_reader(self.sf, self._read_sf_packet)
 
     def close(self):
         '''Close the device'''
