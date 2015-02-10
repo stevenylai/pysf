@@ -1,0 +1,1 @@
+"C:\Program Files\Programming\Python34\python.exe" -m sf.device.zigbee.light.console --bindable="192.168.1.109:3000" --thread
