@@ -2,6 +2,7 @@
 import re
 import os
 import sys
+import asyncio
 from . import base
 
 
@@ -81,3 +82,23 @@ class Control(base.Control):
         if not self.console_on_thread:
             self.event_loop.add_reader(sys.stdin.fileno(),
                                        self.read_input_event)
+
+    def listen(self):
+        '''Listen to the device'''
+        self.create_device()
+        self.device.open()
+        if not self.console_on_thread:
+            self.event_loop.run_until_complete(
+                self.process_packets()
+            )
+        else:
+            self.event_loop.run_until_complete(
+                asyncio.wait(
+                    [
+                        self.process_packets(),
+                        self.event_loop.run_in_executor(
+                            None, self.read_input_thread
+                        )
+                    ]
+                )
+            )

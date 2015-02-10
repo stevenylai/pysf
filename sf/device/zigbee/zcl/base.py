@@ -100,15 +100,16 @@ class Device(base.Device):
             return packet
         zigbee_packet = packet.payload
         if zigbee_packet.type in {
-            zigbee_packet.TYPE_ATTR_READ,
-            zigbee_packet.TYPE_ATTR_REPORT
+                zigbee_packet.TYPE_ATTR_READ,
+                zigbee_packet.TYPE_ATTR_REPORT
         }:
             attr = self.extract_read(zigbee_packet)
             if self.attribute_read(
-                (
-                    True if zigbee_packet.type == zigbee_packet.TYPE_ATTR_READ
-                    else False
-                ), attr
+                    (
+                        True if zigbee_packet.type ==
+                        zigbee_packet.TYPE_ATTR_READ
+                        else False
+                    ), attr
             ):
                 return None
         return packet

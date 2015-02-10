@@ -15,8 +15,8 @@ class RfmPayload(fields.PacketSelector):
             from . import socket_power
             return socket_power.Packet
         if (
-            parent.type == parent.TYPE_SOCKET_STATUS or
-            toggled_type(parent.type) == parent.TYPE_SOCKET_STATUS
+                parent.type == parent.TYPE_SOCKET_STATUS or
+                toggled_type(parent.type) == parent.TYPE_SOCKET_STATUS
         ):
             from . import socket_status
             return socket_status.Packet

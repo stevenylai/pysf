@@ -25,6 +25,9 @@ class Scanner(base.Scanner):
         '''Create scanner'''
         super().__init__(event_loop)
         self.dev_node = None
+        self.code = ""
+        self.lshift = None
+        self.rshift = None
         self.encode = encode
         pattern = re.compile(name_pattern)
         devices = map(evdev.InputDevice, evdev.list_devices())
@@ -65,13 +68,13 @@ class Scanner(base.Scanner):
             return None
         keys = KEYS
         if (
-            self.lshift is not None and
-            self.lshift.keystate == evdev.events.KeyEvent.key_down
+                self.lshift is not None and
+                self.lshift.keystate == evdev.events.KeyEvent.key_down
         ):
             keys = CAPKEYS
         if (
-            self.rshift is not None and
-            self.rshift.keystate == evdev.events.KeyEvent.key_down
+                self.rshift is not None and
+                self.rshift.keystate == evdev.events.KeyEvent.key_down
         ):
             keys = CAPKEYS
 
