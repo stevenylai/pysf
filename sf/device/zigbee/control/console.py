@@ -2,7 +2,6 @@
 import re
 import os
 import sys
-import threading
 from . import base
 
 
@@ -53,6 +52,7 @@ class Control(base.Control):
             control_idx = int(match.group())
             if control_idx < len(self.device_list):
                 self.current_control = control_idx
+                self.zigbee_list_changed()
             return
         args = []
         for match in re.compile('[^ \t]+').finditer(line):
@@ -81,8 +81,3 @@ class Control(base.Control):
         if not self.console_on_thread:
             self.event_loop.add_reader(sys.stdin.fileno(),
                                        self.read_input_event)
-        else:
-            self.input_thread = threading.Thread(
-                target=self.read_input_thread
-            )
-            self.input_thread.start()
