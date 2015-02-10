@@ -10,6 +10,10 @@ class Listener:
         self.device = None
         self.event_loop = asyncio.get_event_loop()
 
+    def post_process_packet(self, packet):
+        '''Post process packet'''
+        self.emit(self.device.packet_string(packet))
+
     def emit(self, packet_string):
         '''Emit packet string'''
         print(packet_string)
@@ -22,7 +26,7 @@ class Listener:
                 packet = yield from self.device.read()
             except InterruptedError:
                 break
-            self.emit(self.device.packet_string(packet))
+            self.post_process_packet(packet)
 
     def create_device(self):
         '''Create device for listening'''

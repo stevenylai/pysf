@@ -1,5 +1,4 @@
 '''Zigbee base controller'''
-import asyncio
 from ... import listen
 
 
@@ -47,22 +46,16 @@ class Control(listen.Listener):
             self.device_list.insert(cur_idx, new_dev)
         self.zigbee_list_changed()
 
-    @asyncio.coroutine
-    def process_packets(self):
-        '''Process zigbee packets from the device'''
-        while True:
-            try:
-                packet = yield from self.device.read()
-            except InterruptedError:
-                break
-            zigbee_packet = packet.payload
-            if zigbee_packet.type == zigbee_packet.TYPE_RESOLVE:
-                new_dev = {
-                    'mac': zigbee_packet.payload.mac,
-                    'addr': zigbee_packet.payload.addr,
-                }
-                self.add_zigbee(new_dev, zigbee_packet.payload)
-            self.process_zigbee_packet(zigbee_packet)
+    def post_process_packet(self, packet):
+        '''Post process packet'''
+        zigbee_packet = packet.payload
+        if zigbee_packet.type == zigbee_packet.TYPE_RESOLVE:
+            new_dev = {
+                'mac': zigbee_packet.payload.mac,
+                'addr': zigbee_packet.payload.addr,
+            }
+            self.add_zigbee(new_dev, zigbee_packet.payload)
+        self.process_zigbee_packet(zigbee_packet)
 
     @property
     def current_device(self):
