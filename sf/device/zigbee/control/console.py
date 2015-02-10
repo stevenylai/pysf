@@ -29,7 +29,6 @@ class Control(base.Control):
         '''Create a Zigbee base controller'''
         super().__init__(device_cls)
         self.console_on_thread = False
-        self.input_thread = None
 
     def read_input_thread(self):
         '''Wait for input from user and process them in a loop'''
