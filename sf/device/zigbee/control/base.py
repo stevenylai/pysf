@@ -51,7 +51,10 @@ class Control(listen.Listener):
     def process_packets(self):
         '''Process zigbee packets from the device'''
         while True:
-            packet = yield from self.device.read()
+            try:
+                packet = yield from self.device.read()
+            except InterruptedError:
+                break
             zigbee_packet = packet.payload
             if zigbee_packet.type == zigbee_packet.TYPE_RESOLVE:
                 new_dev = {

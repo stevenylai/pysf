@@ -31,14 +31,23 @@ class Control(base.Control):
         self.console_on_thread = False
         self.input_thread = None
 
-    def read_input(self):
+    def read_input_thread(self):
         '''Wait for input from user and process them in a loop'''
         while True:
-            self.zigbee_console_command()
+            line = sys.stdin.readline().strip(os.linesep)
+            if line == 'quit':
+                for future in self.device.readers:
+                    future.set_exception(InterruptedError('Stop'))
+                break
+            self.zigbee_console_command(line)
 
-    def zigbee_console_command(self):
-        '''Process Zigbee commands from console'''
+    def read_input_event(self):
+        '''Wait for input from user and process them in a loop'''
         line = sys.stdin.readline().strip(os.linesep)
+        self.zigbee_console_command(line)
+
+    def zigbee_console_command(self, line):
+        '''Process Zigbee commands from console'''
         match = re.compile('^[0-9]+$').search(line)
         if match is not None:
             control_idx = int(match.group())
@@ -71,7 +80,9 @@ class Control(base.Control):
         self.console_on_thread = args.thread
         if not self.console_on_thread:
             self.event_loop.add_reader(sys.stdin.fileno(),
-                                       self.zigbee_console_command)
+                                       self.read_input_event)
         else:
-            self.input_thread = threading.Thread(target=self.read_input)
+            self.input_thread = threading.Thread(
+                target=self.read_input_thread
+            )
             self.input_thread.start()

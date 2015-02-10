@@ -18,7 +18,10 @@ class Listener:
     def process_packets(self):
         '''Process all packets from the device'''
         while True:
-            packet = yield from self.device.read()
+            try:
+                packet = yield from self.device.read()
+            except InterruptedError:
+                break
             self.emit(self.device.packet_string(packet))
 
     def create_device(self):
