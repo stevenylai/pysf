@@ -84,7 +84,7 @@ class Device(base.Device):
                     )
         return extracted_list
 
-    def attribute_read(self, is_read, attribute):
+    def attribute_read(self, zigbee_packet, is_read, attribute):
         '''Process the read attribute.
         Override to implement custom logics
         if this method returns True, then
@@ -105,7 +105,7 @@ class Device(base.Device):
         }:
             attr = self.extract_read(zigbee_packet)
             if self.attribute_read(
-                    (
+                    zigbee_packet, (
                         True if zigbee_packet.type ==
                         zigbee_packet.TYPE_ATTR_READ
                         else False

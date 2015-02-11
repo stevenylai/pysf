@@ -7,11 +7,13 @@ class Device(on_off.Device, level_control.Device):
     '''Light with on/off and level control clusters'''
     end_point = 1
 
-    def attribute_read(self, is_read, attribute):
+    def attribute_read(self, zigbee_packet, is_read, attribute):
         '''Print it out'''
         current = time.time()
         if is_read:
-            print(int(current), 'read', attribute)
+            print(int(current), hex(zigbee_packet.payload.src.short_addr),
+                  'read', attribute)
         else:
-            print(int(current), 'report', attribute)
+            print(int(current), hex(zigbee_packet.payload.src.short_addr),
+                  'report', attribute)
         return True
