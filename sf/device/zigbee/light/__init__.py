@@ -16,4 +16,5 @@ class Device(on_off.Device, level_control.Device):
         else:
             print(int(current), hex(zigbee_packet.payload.src.short_addr),
                   'report', attribute)
+            print(zigbee_packet.payload.get_raw_packet())
         return True
