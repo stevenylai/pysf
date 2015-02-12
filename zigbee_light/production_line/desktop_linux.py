@@ -3,7 +3,7 @@ import asyncio
 import pprint
 import copy
 import json
-import requests
+import aiohttp
 from engel.core.production_line import base
 
 BUTTON_STOP = b's'
@@ -36,6 +36,7 @@ class Production(base.Production):
         self.devices['light'].clear()
         return 'confirm_light'
 
+    @asyncio.coroutine
     def submit_light(self, code):
         '''Submit the light info'''
         from . import settings
@@ -47,17 +48,17 @@ class Production(base.Production):
             }
         )
         print("Submitting to ", settings.ZIGBEE_LIGHT_URL, "with", payload)
-        resp = requests.post(settings.ZIGBEE_LIGHT_URL,
-                             verify=False, params=payload)
-        return resp.text
+        resp = yield from aiohttp.request(
+            'post', settings.ZIGBEE_LIGHT_URL, params=payload
+        )
+        resp_text = yield from resp.text()
+        return resp_text
 
     @asyncio.coroutine
     def confirm_light(self):
         '''Notify the server and confirm the production of a light'''
         code = yield from self.devices['scanner'].read()
-        result = yield from self.event_loop.run_in_executor(
-            None, self.submit_light, code.decode('utf-8')
-        )
+        result = yield from self.submit_light(code.decode('utf-8'))
         print("Confirmed:", pprint.pformat(self.light_info, indent=1),
               code.decode('utf-8'), "Result:", result)
         return 'wait_for_light'
