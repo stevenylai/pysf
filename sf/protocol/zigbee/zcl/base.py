@@ -143,7 +143,6 @@ class ZCL:
     def to_python(self, data):
         '''Convert the data to python type'''
         from ....packet import fields
-        print("Data type:", self.data_type, 'data', data)
         if self.data_type in {
                 self.ZCL_DATATYPE_DATA8, self.ZCL_DATATYPE_BITMAP8,
                 self.ZCL_DATATYPE_INT8, self.ZCL_DATATYPE_UINT8,
