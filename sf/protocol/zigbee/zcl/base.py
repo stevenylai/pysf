@@ -124,28 +124,17 @@ class ZCL:
     def is_analog(self):
         '''Check if the type is analog data type'''
         if self.data_type in {
-                self.ZCL_DATATYPE_UINT8,
-                self.ZCL_DATATYPE_UINT16,
-                self.ZCL_DATATYPE_UINT24,
-                self.ZCL_DATATYPE_UINT32,
-                self.ZCL_DATATYPE_UINT40,
-                self.ZCL_DATATYPE_UINT48,
-                self.ZCL_DATATYPE_UINT56,
-                self.ZCL_DATATYPE_UINT64,
-                self.ZCL_DATATYPE_INT8,
-                self.ZCL_DATATYPE_INT16,
-                self.ZCL_DATATYPE_INT24,
-                self.ZCL_DATATYPE_INT32,
-                self.ZCL_DATATYPE_INT40,
-                self.ZCL_DATATYPE_INT48,
-                self.ZCL_DATATYPE_INT56,
-                self.ZCL_DATATYPE_INT64,
-                self.ZCL_DATATYPE_SEMI_PREC,
-                self.ZCL_DATATYPE_SINGLE_PREC,
-                self.ZCL_DATATYPE_DOUBLE_PREC,
-                self.ZCL_DATATYPE_TOD,
-                self.ZCL_DATATYPE_DATE,
-                self.ZCL_DATATYPE_UTC,
+                self.ZCL_DATATYPE_UINT8, self.ZCL_DATATYPE_UINT16,
+                self.ZCL_DATATYPE_UINT24, self.ZCL_DATATYPE_UINT32,
+                self.ZCL_DATATYPE_UINT40, self.ZCL_DATATYPE_UINT48,
+                self.ZCL_DATATYPE_UINT56, self.ZCL_DATATYPE_UINT64,
+                self.ZCL_DATATYPE_INT8, self.ZCL_DATATYPE_INT16,
+                self.ZCL_DATATYPE_INT24, self.ZCL_DATATYPE_INT32,
+                self.ZCL_DATATYPE_INT40, self.ZCL_DATATYPE_INT48,
+                self.ZCL_DATATYPE_INT56, self.ZCL_DATATYPE_INT64,
+                self.ZCL_DATATYPE_SEMI_PREC, self.ZCL_DATATYPE_SINGLE_PREC,
+                self.ZCL_DATATYPE_DOUBLE_PREC, self.ZCL_DATATYPE_TOD,
+                self.ZCL_DATATYPE_DATE, self.ZCL_DATATYPE_UTC,
         }:
             return True
         else:
@@ -154,36 +143,25 @@ class ZCL:
     def to_python(self, data):
         '''Convert the data to python type'''
         from ....packet import fields
+        print("Data type:", self.data_type, 'data', data)
         if self.data_type in {
-                self.ZCL_DATATYPE_DATA8,
-                self.ZCL_DATATYPE_BITMAP8,
-                self.ZCL_DATATYPE_INT8,
-                self.ZCL_DATATYPE_UINT8,
-                self.ZCL_DATATYPE_ENUM8,
-                self.ZCL_DATATYPE_DATA16,
-                self.ZCL_DATATYPE_BITMAP16,
-                self.ZCL_DATATYPE_UINT16,
-                self.ZCL_DATATYPE_INT16,
-                self.ZCL_DATATYPE_ENUM16,
-                self.ZCL_DATATYPE_CLUSTER_ID,
-                self.ZCL_DATATYPE_ATTR_ID,
-                self.ZCL_DATATYPE_DATA24,
-                self.ZCL_DATATYPE_BITMAP24,
-                self.ZCL_DATATYPE_UINT24,
-                self.ZCL_DATATYPE_INT24,
-                self.ZCL_DATATYPE_DATA32,
-                self.ZCL_DATATYPE_BITMAP32,
-                self.ZCL_DATATYPE_UINT32,
-                self.ZCL_DATATYPE_INT32,
-                self.ZCL_DATATYPE_UINT40,
-                self.ZCL_DATATYPE_UINT48,
+                self.ZCL_DATATYPE_DATA8, self.ZCL_DATATYPE_BITMAP8,
+                self.ZCL_DATATYPE_INT8, self.ZCL_DATATYPE_UINT8,
+                self.ZCL_DATATYPE_ENUM8, self.ZCL_DATATYPE_DATA16,
+                self.ZCL_DATATYPE_BITMAP16, self.ZCL_DATATYPE_UINT16,
+                self.ZCL_DATATYPE_INT16, self.ZCL_DATATYPE_ENUM16,
+                self.ZCL_DATATYPE_CLUSTER_ID, self.ZCL_DATATYPE_ATTR_ID,
+                self.ZCL_DATATYPE_DATA24, self.ZCL_DATATYPE_BITMAP24,
+                self.ZCL_DATATYPE_UINT24, self.ZCL_DATATYPE_INT24,
+                self.ZCL_DATATYPE_DATA32, self.ZCL_DATATYPE_BITMAP32,
+                self.ZCL_DATATYPE_UINT32, self.ZCL_DATATYPE_INT32,
+                self.ZCL_DATATYPE_UINT40, self.ZCL_DATATYPE_UINT48,
                 self.ZCL_DATATYPE_IEEE_ADDR,
         }:
             real_data = data[0: 0 + self.get_length()]
             return fields.byte_to_int(real_data)
         if self.data_type in {
-                self.ZCL_DATATYPE_DATE,
-                self.ZCL_DATATYPE_UTC,
+                self.ZCL_DATATYPE_DATE, self.ZCL_DATATYPE_UTC,
         }:
             real_data = data[0: 0 + self.get_length()]
             date_value = fields.byte_to_int(real_data)

@@ -74,6 +74,7 @@ class Device(base.Device):
         if zcl is None:  # Unknown cluster
             return None
         extracted_list = []
+        print("Attr:", attr_pkt.get_raw_packet())
         for i in range(0, attr_pkt.num_attr):
             attr_item = attr_pkt.attr_data[i]
             accessor = ZCL(attr_item.data_type)
