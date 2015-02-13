@@ -17,7 +17,8 @@ class Control(listen.Listener):
 
     def process_zigbee_packet(self, zigbee_packet):
         '''Process Zigbee packet'''
-        print(zigbee_packet.get_raw_packet())
+        from .... import hex_byte_string
+        print(hex_byte_string(zigbee_packet.get_raw_packet()))
 
     def zigbee_list_changed(self):
         '''Invoked when there's any change to the

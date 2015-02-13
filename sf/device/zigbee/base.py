@@ -22,8 +22,9 @@ class Base(base.Device):
 
     def send_packet(self, packet):
         '''Send a Zigbee packet'''
+        from ... import hex_byte_string
         packet.payload.set_length()
-        print("Send packet: ", packet.get_raw_packet())
+        print("Send packet: ", hex_byte_string(packet.get_raw_packet()))
         self.sf.writePacket(packet.get_raw_packet())
 
 

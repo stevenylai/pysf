@@ -70,4 +70,5 @@ class Device(base.Device):
 
     def packet_string(self, packet):
         '''Packet string'''
-        return packet
+        from .. import hex_byte_string
+        return hex_byte_string(packet)
