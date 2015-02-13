@@ -24,6 +24,7 @@ class Light(Device, interruptable.Device):
         zigbee_packet = packet.payload
         if zigbee_packet.type == zigbee_packet.TYPE_RESOLVE and \
            zigbee_packet.payload.type == zigbee_packet.payload.TYPE_ADDR_JOIN:
+            print("Addr obtained")
             found = {
                 'mac': zigbee_packet.payload.mac,
                 'addr': zigbee_packet.payload.addr
@@ -32,12 +33,10 @@ class Light(Device, interruptable.Device):
                 self.found = found
                 self.do_pair(packet.payload.TYPE_PAIR,
                              self.found['mac'], self.found['addr'])
-            elif not self.paired:
-                if self.found == found:
-                    self.paired = True
-                    for future in self.readers:
-                        future.set_result(self.found)
-                    self.readers.clear()
+                self.paired = True
+                for future in self.readers:
+                    future.set_result(self.found)
+                self.readers.clear()
         return None
 
     @property

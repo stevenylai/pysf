@@ -48,10 +48,13 @@ class Production(base.Production):
             }
         )
         print("Submitting to ", settings.ZIGBEE_LIGHT_URL, "with", payload)
+        conn = aiohttp.TCPConnector(verify_ssl=False)
         resp = yield from aiohttp.request(
-            'post', settings.ZIGBEE_LIGHT_URL, params=payload
+            'post', settings.ZIGBEE_LIGHT_URL, params=payload, connector=conn
         )
+        print("Submitted")
         resp_text = yield from resp.text()
+        print("Result:", resp_text)
         return resp_text
 
     @asyncio.coroutine
