@@ -6,6 +6,7 @@ from ..zcl import on_off, level_control
 class Device(on_off.Device, level_control.Device):
     '''Light with on/off and level control clusters'''
     end_point = 1
+
     def __init__(self, event_loop, bindable='127.0.0.1:3000', key=b''):
         '''Create light device.
         Add attributes to support smooth level commands
