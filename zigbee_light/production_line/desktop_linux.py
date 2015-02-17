@@ -52,7 +52,6 @@ class Production(base.Production):
         resp = yield from aiohttp.request(
             'post', settings.ZIGBEE_LIGHT_URL, params=payload, connector=conn
         )
-        print("Submitted")
         resp_text = yield from resp.text()
         print("Result:", resp_text)
         return resp_text
@@ -80,15 +79,14 @@ class Production(base.Production):
                 self.interrupt()
 
 
-def start(scanner_name):
+def start(scanner_name, , bindable='127.0.0.1:3000', key=b''):
     '''Start the line'''
     from ..core.device import light
     from engel.core.code_scanner import evdev
     from engel.core.panel import console
 
     event_loop = asyncio.get_event_loop()
-    # light = light.Light(event_loop, bindable='192.168.1.47:3000')
-    light = light.Light(event_loop)
+    light = light.Light(event_loop, bindable, key)
     light.open()
     scanner = evdev.Scanner(event_loop, scanner_name)
     scanner.open()
@@ -111,4 +109,4 @@ def start(scanner_name):
     )
 
 if __name__ == '__main__':
-    start('OKE Electron Company')
+    start('OKE Electron Company', bindable='192.168.1.109:3000')

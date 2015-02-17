@@ -6,5 +6,6 @@
 .tox/
 .coverage
 Engel.egg-info/
+docs/build/
 coverage*.xml
 junit*.xml
