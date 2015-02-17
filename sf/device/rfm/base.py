@@ -14,7 +14,8 @@ class Device(base.Device):
 
     def packet_payload_string(self, rfm_packet):
         '''RFM packet payload string'''
-        return rfm_packet.payload.get_raw_packet()
+        from ... import hex_byte_string
+        return hex_byte_string(rfm_packet.payload.get_raw_packet())
 
     def packet_string(self, packet):
         '''RFM packet string'''
@@ -24,8 +25,8 @@ class Device(base.Device):
         rfm_type = rfm_packet.type
         rssi = (
             packet.header.rssi
-            if packet.header_length > 0
-            and packet.header.type == packet.header.RFM_HEADER_RSSI
+            if packet.header_length > 0 and
+            packet.header.type == packet.header.RFM_HEADER_RSSI
             else None
         )
         payload = self.packet_payload_string(rfm_packet)

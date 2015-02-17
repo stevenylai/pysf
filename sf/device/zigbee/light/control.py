@@ -1,4 +1,5 @@
 '''Basic light control module'''
+import time
 import importlib
 from ..control import base, device_selected
 
@@ -6,6 +7,7 @@ from ..control import base, device_selected
 class Control(base.Control):
     '''Control class for zigbee lights'''
     parent_pkg_name = __name__.split('.', 1)[0] + '.device.zigbee.zcl'
+    LEVEL_STEP = 10  # Amount of level changes per second
 
     def cluster_module_from_name(self, cluster):
         '''Get cluster module from its name (e.g. on_off)
@@ -77,3 +79,43 @@ class Control(base.Control):
         self.device.move_to_level(self.current_addr, self.device.end_point,
                                   0, 0,
                                   level, transtime)
+
+    @device_selected
+    def lvu(self):
+        '''Turn the brightness up'''
+        if self.device.current_level < 255:
+            delta = (255 - self.device.current_level) / self.LEVEL_STEP
+            self.device.initial_level = self.device.current_level
+            self.device.move_start_at = time.time()
+            self.device.move_level_upward = True
+            self.level(255, int(delta))
+
+    @device_selected
+    def lvd(self):
+        '''Turn the brightness down'''
+        if self.device.current_level > 0:
+            delta = self.device.current_level / self.LEVEL_STEP
+            self.device.initial_level = self.device.current_level
+            self.device.move_start_at = time.time()
+            self.device.move_level_upward = False
+            self.level(0, int(delta))
+
+    @device_selected
+    def lvs(self):
+        '''Stop brightness changes'''
+        if self.device.move_start_at is not None:
+            stopped = time.time()
+            elapsed = stopped - self.device.move_start_at
+            delta = elapsed * self.LEVEL_STEP
+            if self.device.move_level_upward:
+                if self.device.initial_level + delta < 255:
+                    final_level = int(self.device.initial_level + delta)
+                else:
+                    final_level = 255
+            else:
+                if self.device.initial_level - delta > 0:
+                    final_level = int(self.device.initial_level - delta)
+                else:
+                    final_level = 0
+            self.level(final_level)
+            self.device.move_start_at = None
