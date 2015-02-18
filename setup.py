@@ -4,7 +4,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-projects = ['pysf']
+projects = ['sf', 'engel', 'zigbee_light']
 data_extensions = {'.json'}
 
 

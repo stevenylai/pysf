@@ -11,9 +11,9 @@ this happen, you'll need to have the following hardware:
 The program depends on several Python software packages including:
 
 * evdev: for processing barcode scanner with Linux evdev
-* aiohttp: for accessing the web server in asyncio
+* aiohttp: for accessing the web server in an event loop
 
-The production process involves the following steps:
+The production process involves the following stages:
 
 * Wait for light: wait for a light joining the network
 * Control light: control the joined light and make sure the correct
@@ -25,7 +25,7 @@ Wait for Light
 ==============
 
 To start the program, you'll need to enter the following command at a
-console:
+console (use python3.3 or python3.4 for the PYTHON variable):
 
 ${PYTHON} -m zigbee_light.production_line.desktop_linux
 
